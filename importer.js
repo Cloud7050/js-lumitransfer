@@ -236,7 +236,7 @@ function extractMainText(header) {
 		""
 	);
 
-	// Ignore marks
+	// Ignore marks, would not be present in results if per-question marks are hidden
 	mainText = /^([\s\S]*?)(?:\(\d*\.?\d* marks?\))?$/.exec(mainText)?.[1];
 	if (mainText === undefined) {
 		W("No main text found in question header");
