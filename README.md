@@ -9,7 +9,7 @@ Helpful for:
 - Quizzes that randomly order their questions & answers
 - Quizzes that are simply long
 
-**Currently only supports open-ended questions. Not MCQs or MRQs (yet?).**
+**Currently only supports fill-in-blanks questions. Not MCQs or MRQs (yet?).**
 
 ⚠️ Strictly not to be used for academic dishonesty!
 
@@ -27,3 +27,7 @@ You do not need to download/install anything or know how to code to use these sc
 8. Press enter. You should see some more logs, then another success message at the end
 
 Video showcase (older process): <https://youtu.be/VEKyakTH0CU>
+
+## Limitations
+
+- If an MRQ option has no text whatsoever (eg only an *image* of $\overline{X}$), due to potentially randomised option order, the option cannot be uniquely identified & so gets skipped with a yellow warning
