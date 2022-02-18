@@ -26,3 +26,5 @@ You do not need to know how to code or install anything to use these scripts.
 7. Open your browser's DevTools again, go to its *console* tab, & paste the `importer` script in
 8. Press enter. You should be prompted to paste your data in. Do so, then press ok
 9. The data should now have been used to overwrite the fields of any matching questions
+
+Video showcase: <https://youtu.be/VEKyakTH0CU>
