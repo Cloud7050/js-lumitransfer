@@ -325,7 +325,12 @@ function singleImport(userQuestionData, pageData, doms) {
 				break;
 		}
 
-		if (success) break;
+		if (success) {
+			// Remove for efficiency
+			pageData.splice(i, 1);
+			doms.splice(i, 1);
+			break;
+		};
 	}
 
 	if (!success) W("No matches for user question data");
