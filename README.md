@@ -30,4 +30,4 @@ Video showcase (older process): <https://youtu.be/VEKyakTH0CU>
 
 ## Limitations
 
-- If an MRQ option has no text whatsoever (eg only an *image* of $\overline{X}$), due to potentially randomised option order, the option cannot be uniquely identified & so gets skipped with a yellow warning
+- If an MRQ option has no text whatsoever (eg only an *image* of x̅), due to potentially randomised option order, the option cannot be uniquely identified & so gets skipped with a yellow warning
