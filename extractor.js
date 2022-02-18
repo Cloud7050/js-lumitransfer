@@ -252,9 +252,17 @@ function tryExtractOe(questionHolder) {
 
 // =============================================================================
 
+function storeData(data) {
+	localStorage.setItem(
+		"userData",
+		JSON.stringify(data)
+	);
+}
+
 (() => {
 	let data = assembleData();
 	if (data === null) return;
 
-	L(JSON.stringify(data), false);
+	storeData(data);
+	L("✅ Extractor done running. Run the importer next");
 })();

@@ -252,20 +252,24 @@ function tryExtractOe(questionHolder) {
 
 // =============================================================================
 
-function requestData() {
-	let rawData = window.prompt("Paste in the data obtained via the extractor script");
+function retrieveData() {
+	let rawData = localStorage.getItem("userData");
+	if (rawData === null) {
+		E("⛔ No user data found. Run the extractor before running the importer");
+		return null;
+	}
 
-	let userData;
+	let data;
 	try {
-		userData = JSON.parse(rawData);
+		data = JSON.parse(rawData);
 	} catch (syntaxError) {
-		E("Unreadable input");
+		E("User data unreadable");
 		E(syntaxError, false);
 		return null;
 	}
 
-	D(userData, false);
-	return userData;
+	D(data, false);
+	return data;
 }
 
 function useData(userData, pageData, doms) {
@@ -279,7 +283,7 @@ function useData(userData, pageData, doms) {
 			singleImport(userQuestionData, pageData, doms);
 		}
 	} catch (error) {
-		E("Bad input");
+		E("Bad user data format");
 		E(error, false);
 	}
 }
@@ -317,7 +321,7 @@ function singleImport(userQuestionData, pageData, doms) {
 		if (success) break;
 	}
 
-	if (!success) W("User question data not applicable");
+	if (!success) W("No matches for user question data");
 }
 function importOe(inputData, inputDom) {
 	D(inputData, false);
@@ -335,12 +339,13 @@ function importOe(inputData, inputDom) {
 }
 
 (() => {
+	let userData = retrieveData();
+	if (userData === null) return;
+
 	let doms = [];
 	let pageData = assembleData("quiz-question-all", doms);
 	if (pageData === null) return;
 
-	let userData = requestData();
-	if (userData === null) return;
-
 	useData(userData, pageData, doms);
+	L("✅ Importer done running. Matching questions overwritten");
 })();
