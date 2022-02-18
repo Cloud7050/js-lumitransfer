@@ -84,7 +84,7 @@ class BlanksInputDom extends InputDom {}
 
 class ResponsesInputDom extends InputDom {}
 
-class EntryData {
+class BlanksEntryData {
 	constructor(
 		value
 	) {
@@ -95,18 +95,17 @@ class EntryData {
 	}
 }
 
-class BlanksEntryData extends EntryData {}
-
-class ResponsesEntryData extends EntryData {
+class ResponsesEntryData {
 	constructor(
-		value,
-		entryText
+		entryText,
+		checked
 	) {
-		super(value);
-
 		Object.assign(
 			this,
-			{ entryText }
+			{
+				entryText,
+				checked
+			}
 		);
 	}
 }
@@ -323,18 +322,26 @@ function tryExtractResponses(questionHolder) {
 			continue;
 		}
 
-		let checkbox = option.getElementsByTagName("input")?.[0];
+		let checkbox = option.getElementsByClassName("checkbox")?.[0];
 		if (checkbox === undefined) {
 			W("No checkbox found in option");
 			continue;
 		}
 
-		let value = checkbox.value;
+		let span = checkbox.getElementsByTagName("span")?.[0];
+		if (span === undefined) {
+			W("No span found in checkbox");
+			continue;
+		}
+
+		let styleDeclaration = window.getComputedStyle(span, "::before");
+		let backgroundImage = styleDeclaration.getPropertyValue("background-image");
+		let checked = backgroundImage !== "none";
 
 		entries.push(
 			new ResponsesEntryData(
-				value,
-				entryText
+				entryText,
+				checked
 			)
 		);
 		entryDoms.push(
