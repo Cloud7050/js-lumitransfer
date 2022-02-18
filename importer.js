@@ -84,12 +84,12 @@ class OeEntryData {
 
 class OeEntryDom {
 	constructor(
-		textarea
+		control
 	) {
 		Object.assign(
 			this,
 			{
-				textarea
+				control
 			}
 		);
 	}
@@ -155,7 +155,7 @@ function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
 			continue;
 		}
 
-		let headerText = header.innerText;
+		let headerText = extractHeaderText(header);
 
 		let question = questionHolder.getElementsByClassName("question")?.[0];
 		let bodyText = null;
@@ -195,6 +195,20 @@ function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
 	D(doms, false);
 	return data;
 }
+function extractHeaderText(header) {
+	return Array.from(header.children).reduce(
+		(output, child) => {
+			// To prevent mismatches due to weird extra elements containing whitespace when viewing results
+			let text = child.innerText.trim();
+
+			// Ignore marks
+			if (/\([\d\.]+ marks?\)/.test(text)) text = "";
+
+			return output + text;
+		},
+		""
+	);
+}
 function tryExtractOe(questionHolder) {
 	let inputHolder = questionHolder.getElementsByClassName("input-container")?.[0];
 	if (inputHolder === undefined) {
@@ -211,19 +225,22 @@ function tryExtractOe(questionHolder) {
 	let entries = [];
 	let entryDoms = [];
 	for (let input of inputs) {
-		let textarea = Array.from(input.children).filter(child => child.tagName === "TEXTAREA")?.[0];
-		if (textarea === undefined) {
-			W("No textarea found in input");
+		let children = Array.from(input.children);
+
+		let control = children.filter(child => child.tagName === "INPUT")?.[0];
+		if (control === undefined) {
+			W("No control found in input");
 			continue;
 		}
 
-		let value = textarea.value;
+		// Results have an extra element
+		let textarea = children.filter(child => child.tagName === "TEXTAREA")?.[0];
 
 		entries.push(
-			new OeEntryData(value)
+			new OeEntryData(textarea?.value)
 		);
 		entryDoms.push(
-			new OeEntryDom(textarea)
+			new OeEntryDom(control)
 		);
 	}
 
@@ -259,15 +276,15 @@ function useData(userData, pageData, doms) {
 			questionNumber++;
 			L(`Importing what was question #${questionNumber}:`);
 
-			tryImport(userQuestionData, pageData, doms);
+			singleImport(userQuestionData, pageData, doms);
 		}
 	} catch (error) {
 		E("Bad input");
 		E(error, false);
 	}
 }
-function tryImport(userQuestionData, pageData, doms) {
-	D(userQuestionData);
+function singleImport(userQuestionData, pageData, doms) {
+	D(userQuestionData, false);
 
 	let success = false;
 	for (let i = 0; i < pageData.length; i++) {
@@ -289,7 +306,8 @@ function tryImport(userQuestionData, pageData, doms) {
 
 		switch (userInputData.type) {
 			case "oe":
-				success = tryImportOe(userInputData, pageInputData, inputDom);
+				tryImportOe(userInputData, inputDom);
+				success = true;
 				break;
 			default:
 				W("Input data type in user question data not recognised");
@@ -301,8 +319,19 @@ function tryImport(userQuestionData, pageData, doms) {
 
 	if (!success) W("User question data not applicable");
 }
-function tryImportOe(userInputData, pageInputData, inputDom) {
-	//TODO
+function tryImportOe(inputData, inputDom) {
+	D(inputData, false);
+	D(inputDom, false);
+
+	let entries = inputData.entries;
+	let entryDoms = inputDom.entryDoms;
+
+	for (let i = 0; i < entries.length; i++) {
+		let entryData = entries[i];
+		let entryDom = entryDoms[i];
+
+		entryDom.control.value = entryData.value;
+	}
 }
 
 (() => {
