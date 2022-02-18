@@ -1,23 +1,34 @@
-class Question {
+class QuestionData {
 	constructor(
-		number,
 		headerText,
 		bodyText,
-		input
+		inputData
 	) {
 		Object.assign(
 			this,
 			{
-				number,
 				headerText,
 				bodyText,
-				input
+				inputData
 			}
 		);
 	}
 }
 
-class Input {
+class QuestionDom {
+	constructor(
+		inputDom
+	) {
+		Object.assign(
+			this,
+			{
+				inputDom
+			}
+		);
+	}
+}
+
+class InputData {
 	constructor(
 		type
 	) {
@@ -30,9 +41,8 @@ class Input {
 	}
 }
 
-class OeInput extends Input {
+class OeInputData extends InputData {
 	constructor(
-		inputText,
 		entries
 	) {
 		super("oe");
@@ -40,157 +50,196 @@ class OeInput extends Input {
 		Object.assign(
 			this,
 			{
-				inputText,
 				entries
 			}
 		);
 	}
 }
 
-class Entry {
+class OeInputDom {
 	constructor(
-		number,
+		entryDoms
+	) {
+		Object.assign(
+			this,
+			{
+				entryDoms
+			}
+		);
+	}
+}
+
+class OeEntryData {
+	constructor(
 		value
 	) {
 		Object.assign(
 			this,
 			{
-				number,
 				value
 			}
 		);
 	}
 }
 
-function elementsToText(elements) {
-	return elements
-		.map(element => element.innerText)
-		.reduce(
-			(output, text) => output += text
+class OeEntryDom {
+	constructor(
+		textarea
+	) {
+		Object.assign(
+			this,
+			{
+				textarea
+			}
 		);
+	}
 }
 
-function tryExtractOe(questionHolder) {
-	let inputHolder = questionHolder.getElementsByClassName("input-container")?.[0];
-	if (inputHolder === undefined) {
-		console.debug("*** No input holder found in question holder, probably not OE");
+class InputPair {
+	constructor(
+		inputData,
+		inputDom
+	) {
+		Object.assign(
+			this,
+			{
+				inputData,
+				inputDom
+			}
+		);
+	}
+}
+
+function L(content, addText = true) {
+	if (addText) content = `>>> ${content}`;
+	console.log(content);
+}
+
+function W(content, addText = true) {
+	if (addText) content = `[!] ${content}!`;
+	console.warn(content);
+}
+
+function E(content, addText = true) {
+	if (addText) content = `ERR ${content}!`;
+	console.error(content);
+}
+
+function D(content, addText = true) {
+	if (addText) content = `*** ${content}`;
+	console.debug(content);
+}
+
+function findQuestionHolders() {
+	let quizHolder = document.getElementsByTagName("quiz-question-results")?.[0];
+	if (quizHolder === undefined) {
+		E("No quiz holder found in page");
 		return null;
 	}
 
-	let inputHolderOthers = [];
-	let inputs = [];
-	for (let child of inputHolder.children) {
-		if (!child.classList.contains("input")) inputHolderOthers.push(child);
-		else inputs.push(child);
+	let questionHolders = quizHolder.getElementsByTagName("quiz-question-view");
+	if (questionHolders.length === 0) {
+		E("No question holders found in quiz holder");
+		return null;
 	}
 
-	let inputText = elementsToText(inputHolderOthers);
-	if (inputText.length <= 0) {
-		inputText = null;
-
-		console.debug("*** No input text found in input holder");
-	}
-
-	let entries = [];
-	for (let input of inputs) {
-		let children = input.children;
-		let numberElement = children?.[0];
-		let number = numberElement?.innerText;
-		if (number === undefined) {
-			number = null;
-
-			console.debug("*** No number found in input");
-		}
-
-		let textarea;
-		for (let child of children) {
-			if (child.tagName === "TEXTAREA") {
-				textarea = child;
-				break;
-			}
-		}
-		if (textarea === undefined) {
-			console.warn("[!] No textarea found in input!");
-			return null;
-		}
-		let value = textarea.value;
-
-		entries.push(
-			new Entry(
-				number,
-				value
-			)
-		);
-	}
-
-	return new OeInput(
-		inputText,
-		entries
-	);
+	return questionHolders;
 }
 
-(() => {
-	let quizHolder = document.getElementsByTagName("quiz-question-results")?.[0];
-	if (quizHolder === undefined) {
-		console.warn("[!] No quiz holder found in page!");
-		return;
-	}
-
-	let questionHolders = quizHolder.getElementsByTagName("quiz-question-view");
-	if (questionHolders.length <= 0) {
-		console.warn("[!] No question holders found in quiz holder!");
-		return;
-	}
-
+function assembleData(questionHolders, doms = []) {
 	let data = [];
+	let questionNumber = 0;
+
 	for (let questionHolder of questionHolders) {
-		let parent = questionHolder.parentElement;
-		let parentId = parent?.id;
-		let number = parentId?.match(/^question-(\d+)$/)?.[1];
-		if (number === undefined) {
-			number = "?";
-
-			console.log(">>> No number found around question holder");
-		}
-
-		console.log(`>>> Extracting question #${number}:`);
+		questionNumber++;
+		L(`Extracting question #${questionNumber}:`);
 
 		let header = questionHolder.getElementsByClassName("question-header")?.[0];
 		if (header === undefined) {
-			console.warn("[!] No question header found in question holder!");
+			W("No header found in question holder");
 			continue;
 		}
+
 		let headerText = header.innerText;
 
+
 		let question = questionHolder.getElementsByClassName("question")?.[0];
-		let bodyText;
-		if (question !== undefined) bodyText = question.innerText;
-		else {
-			bodyText = null;
+		let bodyText = null;
+		if (question === undefined) L("No body found in question header");
+		else bodyText = question.innerText;
 
-			console.log(">>> No question body found in question holder");
-		}
-
-		let input = tryExtractOe(questionHolder);
+		let inputPair = tryExtractOe(questionHolder);
 		// ?? try()
 		//TODO
 
-		if (input === null) {
-			console.warn("[!] Contents in question holder not recognised!");
+		if (inputPair === null) {
+			W("Contents in question holder not recognised");
 			continue;
 		}
 
-		let questionData = new Question(
-			number,
+		let questionData = new QuestionData(
 			headerText,
 			bodyText,
-			input
+			inputPair.inputData
+		);
+		let questionDom = new QuestionDom(
+			inputPair.inputDom
 		);
 
-		console.debug(questionData);
+		D(questionData, false);
+		D(questionDom, false);
 		data.push(questionData);
+		doms.push(questionDom);
 	}
 
-	console.log(data);
-	console.log(JSON.stringify(data));
+	return data;
+}
+function tryExtractOe(questionHolder) {
+	let inputHolder = questionHolder.getElementsByClassName("input-container")?.[0];
+	if (inputHolder === undefined) {
+		D("No input holder found in question holder. Probably not OE");
+		return null;
+	}
+
+	let inputs = Array.from(inputHolder.children).filter(child => child.classList.contains("input"));
+	if (inputs.length === 0) {
+		W("No inputs found in input holder");
+		return null;
+	}
+
+	let entries = [];
+	let entryDoms = [];
+	for (let input of inputs) {
+		let textarea = Array.from(input.children).filter(child => child.tagName === "TEXTAREA")?.[0];
+		if (textarea === undefined) {
+			W("No textarea found in input!");
+			continue;
+		}
+
+		let value = textarea.value;
+
+		entries.push(
+			new OeEntryData(value)
+		);
+		entryDoms.push(
+			new OeEntryDom(textarea)
+		);
+	}
+
+	return new InputPair(
+		new OeInputData(entries),
+		new OeInputDom(entryDoms)
+	);
+}
+
+// =============================================================================
+
+(() => {
+	let questionHolders = findQuestionHolders();
+	if (questionHolders === null) return;
+
+	let data = assembleData(questionHolders);
+
+	D(data, false);
+	L(JSON.stringify(data), false);
 })();
