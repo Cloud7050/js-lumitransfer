@@ -1,13 +1,13 @@
 class QuestionData {
 	constructor(
-		headerText,
+		mainText,
 		bodyText,
 		inputData
 	) {
 		Object.assign(
 			this,
 			{
-				headerText,
+				mainText,
 				bodyText,
 				inputData
 			}
@@ -130,7 +130,7 @@ function D(content, addText = true) {
 	console.debug(content);
 }
 
-function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
+function assembleData(quizHolderTag, doms = []) {
 	let quizHolder = document.getElementsByTagName(quizHolderTag)?.[0];
 	if (quizHolder === undefined) {
 		E("No quiz holder found in page");
@@ -155,7 +155,8 @@ function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
 			continue;
 		}
 
-		let headerText = extractHeaderText(header);
+		let mainText = extractMainText(header);
+		if (mainText === null) continue;
 
 		let question = questionHolder.getElementsByClassName("question")?.[0];
 		let bodyText = null;
@@ -172,7 +173,7 @@ function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
 		}
 
 		let questionData = new QuestionData(
-			headerText,
+			mainText,
 			bodyText,
 			inputPair.inputData
 		);
@@ -195,19 +196,24 @@ function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
 	D(doms, false);
 	return data;
 }
-function extractHeaderText(header) {
-	return Array.from(header.children).reduce(
+function extractMainText(header) {
+	let mainText = Array.from(header.children).reduce(
 		(output, child) => {
 			// To prevent mismatches due to weird extra elements containing whitespace when viewing results
-			let text = child.innerText.trim();
-
-			// Ignore marks
-			if (/\([\d\.]+ marks?\)/.test(text)) text = "";
-
-			return output + text;
+			let trimmed = child.innerText.trim();
+			return output + trimmed;
 		},
 		""
 	);
+
+	// Ignore marks
+	mainText = /^([\s\S]*?)(?:\(\d*\.?\d* marks?\))?$/.exec(mainText)?.[1];
+	if (mainText === undefined) {
+		W("No main text found in question header");
+		return null;
+	}
+
+	return mainText;
 }
 function tryExtractOe(questionHolder) {
 	let inputHolder = questionHolder.getElementsByClassName("input-container")?.[0];
@@ -296,7 +302,7 @@ function singleImport(userQuestionData, pageData, doms) {
 		let dom = doms[i];
 
 		if (
-			userQuestionData.headerText !== pageQuestionData.headerText
+			userQuestionData.mainText !== pageQuestionData.mainText
 			|| userQuestionData.bodyText !== pageQuestionData.bodyText
 		) {
 			continue;
