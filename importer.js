@@ -266,8 +266,6 @@ function tryExtractBlanks(questionHolder) {
 	let entries = [];
 	let entryDoms = [];
 	for (let input of inputs) {
-		let children = Array.from(input.children);
-
 		// Results have an additional textarea
 		let textarea = input.getElementsByClassName("answer-fib")?.[0];
 		let value = textarea?.value ?? null;
@@ -322,21 +320,27 @@ function tryExtractResponses(questionHolder) {
 			continue;
 		}
 
-		let checkbox = option.getElementsByClassName("checkbox")?.[0];
-		if (checkbox === undefined) {
-			W("No checkbox found in option");
+		let checkboxHolder = option.getElementsByClassName("checkbox")?.[0];
+		if (checkboxHolder === undefined) {
+			W("No checkbox holder found in option");
 			continue;
 		}
 
-		let span = checkbox.getElementsByTagName("span")?.[0];
+		let span = checkboxHolder.getElementsByTagName("span")?.[0];
 		if (span === undefined) {
-			W("No span found in checkbox");
+			W("No span found in checkbox holder");
 			continue;
 		}
 
 		let styleDeclaration = window.getComputedStyle(span, "::before");
 		let backgroundImage = styleDeclaration.getPropertyValue("background-image");
 		let checked = backgroundImage !== "none";
+
+		let checkbox = checkboxHolder.getElementsByTagName("input")?.[0];
+		if (span === undefined) {
+			W("No checkbox found in checkbox holder");
+			continue;
+		}
 
 		entries.push(
 			new ResponsesEntryData(
