@@ -1,14 +1,12 @@
 class QuestionData {
 	constructor(
 		mainText,
-		bodyText,
 		inputData
 	) {
 		Object.assign(
 			this,
 			{
 				mainText,
-				bodyText,
 				inputData
 			}
 		);
@@ -43,6 +41,7 @@ class InputData {
 
 class OeInputData extends InputData {
 	constructor(
+		referenceText,
 		entries
 	) {
 		super("oe");
@@ -50,6 +49,7 @@ class OeInputData extends InputData {
 		Object.assign(
 			this,
 			{
+				referenceText,
 				entries
 			}
 		);
@@ -158,14 +158,7 @@ function assembleData(quizHolderTag, doms = []) {
 		let mainText = extractMainText(header);
 		if (mainText === null) continue;
 
-		let question = questionHolder.getElementsByClassName("question")?.[0];
-		let bodyText = null;
-		if (question === undefined) L("No body found in question header");
-		else bodyText = question.innerText;
-
 		let inputPair = tryExtractOe(questionHolder);
-		// ?? try()
-		//TODO
 
 		if (inputPair === null) {
 			W("Contents in question holder not recognised");
@@ -174,7 +167,6 @@ function assembleData(quizHolderTag, doms = []) {
 
 		let questionData = new QuestionData(
 			mainText,
-			bodyText,
 			inputPair.inputData
 		);
 		let questionDom = new QuestionDom(
@@ -216,9 +208,20 @@ function extractMainText(header) {
 	return mainText;
 }
 function tryExtractOe(questionHolder) {
-	let inputHolder = questionHolder.getElementsByClassName("input-container")?.[0];
+	let oeHolder = questionHolder.getElementsByTagName("question-view-fib")?.[0];
+	if (oeHolder === undefined) {
+		D("No OE holder found in question holder, not OE");
+		return null;
+	}
+
+	let question = oeHolder.getElementsByClassName("question")?.[0];
+	let referenceText = null;
+	if (question === undefined) L("No question found in OE holder");
+	else referenceText = question.innerText;
+
+	let inputHolder = oeHolder.getElementsByClassName("input-container")?.[0];
 	if (inputHolder === undefined) {
-		D("No input holder found in question holder. Probably not OE");
+		W("No input holder found in OE holder");
 		return null;
 	}
 
@@ -233,17 +236,18 @@ function tryExtractOe(questionHolder) {
 	for (let input of inputs) {
 		let children = Array.from(input.children);
 
+		// Results have an additional textarea
+		let textarea = children.filter(child => child.tagName === "TEXTAREA")?.[0];
+		let value = textarea?.value ?? null;
+
 		let control = children.filter(child => child.tagName === "INPUT")?.[0];
 		if (control === undefined) {
 			W("No control found in input");
 			continue;
 		}
 
-		// Results have an extra element
-		let textarea = children.filter(child => child.tagName === "TEXTAREA")?.[0];
-
 		entries.push(
-			new OeEntryData(textarea?.value)
+			new OeEntryData(value)
 		);
 		entryDoms.push(
 			new OeEntryDom(control)
@@ -251,7 +255,10 @@ function tryExtractOe(questionHolder) {
 	}
 
 	return new InputPair(
-		new OeInputData(entries),
+		new OeInputData(
+			referenceText,
+			entries
+		),
 		new OeInputDom(entryDoms)
 	);
 }
