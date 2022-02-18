@@ -306,7 +306,7 @@ function singleImport(userQuestionData, pageData, doms) {
 
 		switch (userInputData.type) {
 			case "oe":
-				tryImportOe(userInputData, inputDom);
+				importOe(userInputData, inputDom);
 				success = true;
 				break;
 			default:
@@ -319,7 +319,7 @@ function singleImport(userQuestionData, pageData, doms) {
 
 	if (!success) W("User question data not applicable");
 }
-function tryImportOe(inputData, inputDom) {
+function importOe(inputData, inputDom) {
 	D(inputData, false);
 	D(inputDom, false);
 
