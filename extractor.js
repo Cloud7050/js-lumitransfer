@@ -84,12 +84,12 @@ class OeEntryData {
 
 class OeEntryDom {
 	constructor(
-		textarea
+		control
 	) {
 		Object.assign(
 			this,
 			{
-				textarea
+				control
 			}
 		);
 	}
@@ -155,7 +155,7 @@ function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
 			continue;
 		}
 
-		let headerText = header.innerText;
+		let headerText = extractHeaderText(header);
 
 		let question = questionHolder.getElementsByClassName("question")?.[0];
 		let bodyText = null;
@@ -195,6 +195,20 @@ function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
 	D(doms, false);
 	return data;
 }
+function extractHeaderText(header) {
+	return Array.from(header.children).reduce(
+		(output, child) => {
+			// To prevent mismatches due to weird extra elements containing whitespace when viewing results
+			let text = child.innerText.trim();
+
+			// Ignore marks
+			if (/\([\d\.]+ marks?\)/.test(text)) text = "";
+
+			return output + text;
+		},
+		""
+	);
+}
 function tryExtractOe(questionHolder) {
 	let inputHolder = questionHolder.getElementsByClassName("input-container")?.[0];
 	if (inputHolder === undefined) {
@@ -211,19 +225,22 @@ function tryExtractOe(questionHolder) {
 	let entries = [];
 	let entryDoms = [];
 	for (let input of inputs) {
-		let textarea = Array.from(input.children).filter(child => child.tagName === "TEXTAREA")?.[0];
-		if (textarea === undefined) {
-			W("No textarea found in input");
+		let children = Array.from(input.children);
+
+		let control = children.filter(child => child.tagName === "INPUT")?.[0];
+		if (control === undefined) {
+			W("No control found in input");
 			continue;
 		}
 
-		let value = textarea.value;
+		// Results have an extra element
+		let textarea = children.filter(child => child.tagName === "TEXTAREA")?.[0];
 
 		entries.push(
-			new OeEntryData(value)
+			new OeEntryData(textarea?.value)
 		);
 		entryDoms.push(
-			new OeEntryDom(textarea)
+			new OeEntryDom(control)
 		);
 	}
 
