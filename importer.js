@@ -1,171 +1,317 @@
-function elementsToText(elements) {
-	return elements
-		.map(element => element.innerText)
-		.reduce(
-			(output, text) => output += text
+class QuestionData {
+	constructor(
+		headerText,
+		bodyText,
+		inputData
+	) {
+		Object.assign(
+			this,
+			{
+				headerText,
+				bodyText,
+				inputData
+			}
 		);
-}
-
-function tryImportOe(questionHolders, questionData) {
-	for (let questionHolder of questionHolders) {
-		let parent = questionHolder.parentElement;
-		let parentId = parent?.id;
-		let number = parentId?.match(/^question-(\d+)$/)?.[1];
-		if (number === undefined) {
-			number = "?";
-
-			console.log(">>> No number found around question holder");
-		}
-
-		console.debug(`*** Matching against question #${number}:`);
-
-		let header = questionHolder.getElementsByClassName("question-header")?.[0];
-		if (header === undefined) {
-			console.warn("[!] No question header found in question holder!");
-			continue;
-		}
-		let headerText = header.innerText;
-		if (headerText !== questionData.headerText) {
-			console.debug("*** headerText mismatch");
-			continue;
-		}
-
-		let question = questionHolder.getElementsByClassName("question")?.[0];
-		let bodyText;
-		if (question !== undefined) bodyText = question.innerText;
-		else {
-			bodyText = null;
-
-			console.log(">>> No question body found in question holder");
-		}
-		if (bodyText !== questionData.bodyText) {
-			console.debug("*** bodyText mismatch");
-			continue;
-		}
-
-		let inputHolder = questionHolder.getElementsByClassName("input-container")?.[0];
-		if (inputHolder === undefined) {
-			console.debug("*** No input holder found in question holder, probably not OE");
-			continue;
-		}
-
-		let inputHolderOthers = [];
-		let inputs = [];
-		for (let child of inputHolder.children) {
-			if (!child.classList.contains("input")) inputHolderOthers.push(child);
-			else inputs.push(child);
-		}
-
-		let inputText = elementsToText(inputHolderOthers);
-		if (inputText.length <= 0) {
-			inputText = null;
-
-			console.debug("*** No input text found in input holder");
-		}
-		if (inputText !== questionData.input.inputText) {
-			console.debug("*** inputText mismatch");
-			continue;
-		}
-
-		let entries = questionData.input.entries;
-		for (let input of inputs) {
-			let entry = entries.shift();
-
-			//TODO
-			let children = input.children;
-			let numberElement = children?.[0];
-			let number = numberElement?.innerText;
-			if (number === undefined) {
-				number = null;
-
-				console.debug("*** No number found in input");
-			}
-			if (number !== entry.number) {
-				console.warn("[!] Entry number mismatch!");
-				continue;
-			}
-
-			let textarea;
-			for (let child of children) {
-				if (child.tagName === "TEXTAREA") {
-					textarea = child;
-					break;
-				}
-			}
-			if (textarea === undefined) {
-				console.warn("[!] No textarea found in input!");
-				return null;
-			}
-			let value = textarea.value;
-
-			entries.push(
-				new Entry(
-					number,
-					value
-				)
-			);
-		}
-
-		if (input === null) {
-			console.warn("[!] Contents in question holder not recognised!");
-			continue;
-		}
-
-		let questionData = new Question(
-			number,
-			headerText,
-			bodyText,
-			input
-		);
-
-		console.debug(questionData);
-		data.push(questionData);
 	}
 }
 
-(() => {
-	//FIXME
-	let rawData = 'REDACTED';
-	// console.debug(rawData);
-
-	let data;
-	try {
-		data = JSON.parse(rawData);
-	} catch (syntaxError) {
-		console.error("ERR Unreadable input!");
+class QuestionDom {
+	constructor(
+		inputDom
+	) {
+		Object.assign(
+			this,
+			{
+				inputDom
+			}
+		);
 	}
-	console.debug(data);
+}
 
-	let quizHolder = document.getElementsByTagName("quiz-question-results")?.[0];
+class InputData {
+	constructor(
+		type
+	) {
+		Object.assign(
+			this,
+			{
+				type
+			}
+		);
+	}
+}
+
+class OeInputData extends InputData {
+	constructor(
+		entries
+	) {
+		super("oe");
+
+		Object.assign(
+			this,
+			{
+				entries
+			}
+		);
+	}
+}
+
+class OeInputDom {
+	constructor(
+		entryDoms
+	) {
+		Object.assign(
+			this,
+			{
+				entryDoms
+			}
+		);
+	}
+}
+
+class OeEntryData {
+	constructor(
+		value
+	) {
+		Object.assign(
+			this,
+			{
+				value
+			}
+		);
+	}
+}
+
+class OeEntryDom {
+	constructor(
+		textarea
+	) {
+		Object.assign(
+			this,
+			{
+				textarea
+			}
+		);
+	}
+}
+
+class InputPair {
+	constructor(
+		inputData,
+		inputDom
+	) {
+		Object.assign(
+			this,
+			{
+				inputData,
+				inputDom
+			}
+		);
+	}
+}
+
+function L(content, addText = true) {
+	if (addText) content = `>>> ${content}`;
+	console.log(content);
+}
+
+function W(content, addText = true) {
+	if (addText) content = `[!] ${content}!`;
+	console.warn(content);
+}
+
+function E(content, addText = true) {
+	if (addText) content = `ERR ${content}!`;
+	console.error(content);
+}
+
+function D(content, addText = true) {
+	if (addText) content = `*** ${content}`;
+	console.debug(content);
+}
+
+function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
+	let quizHolder = document.getElementsByTagName(quizHolderTag)?.[0];
 	if (quizHolder === undefined) {
-		console.warn("[!] No quiz holder found in page!");
-		return;
+		E("No quiz holder found in page");
+		return null;
 	}
 
 	let questionHolders = quizHolder.getElementsByTagName("quiz-question-view");
-	if (questionHolders.length <= 0) {
-		console.warn("[!] No question holders found in quiz holder!");
-		return;
+	if (questionHolders.length === 0) {
+		E("No question holders found in quiz holder");
+		return null;
 	}
 
+	let data = [];
+	let questionNumber = 0;
+	for (let questionHolder of questionHolders) {
+		questionNumber++;
+		L(`Extracting question #${questionNumber}:`);
+
+		let header = questionHolder.getElementsByClassName("question-header")?.[0];
+		if (header === undefined) {
+			W("No header found in question holder");
+			continue;
+		}
+
+		let headerText = header.innerText;
+
+		let question = questionHolder.getElementsByClassName("question")?.[0];
+		let bodyText = null;
+		if (question === undefined) L("No body found in question header");
+		else bodyText = question.innerText;
+
+		let inputPair = tryExtractOe(questionHolder);
+		// ?? try()
+		//TODO
+
+		if (inputPair === null) {
+			W("Contents in question holder not recognised");
+			continue;
+		}
+
+		let questionData = new QuestionData(
+			headerText,
+			bodyText,
+			inputPair.inputData
+		);
+		let questionDom = new QuestionDom(
+			inputPair.inputDom
+		);
+
+		D(questionData, false);
+		D(questionDom, false);
+		data.push(questionData);
+		doms.push(questionDom);
+	}
+
+	if (data.length === 0) {
+		E("No data found in question holders");
+		return null;
+	}
+
+	D(data, false);
+	D(doms, false);
+	return data;
+}
+function tryExtractOe(questionHolder) {
+	let inputHolder = questionHolder.getElementsByClassName("input-container")?.[0];
+	if (inputHolder === undefined) {
+		D("No input holder found in question holder. Probably not OE");
+		return null;
+	}
+
+	let inputs = Array.from(inputHolder.children).filter(child => child.classList.contains("input"));
+	if (inputs.length === 0) {
+		W("No inputs found in input holder");
+		return null;
+	}
+
+	let entries = [];
+	let entryDoms = [];
+	for (let input of inputs) {
+		let textarea = Array.from(input.children).filter(child => child.tagName === "TEXTAREA")?.[0];
+		if (textarea === undefined) {
+			W("No textarea found in input");
+			continue;
+		}
+
+		let value = textarea.value;
+
+		entries.push(
+			new OeEntryData(value)
+		);
+		entryDoms.push(
+			new OeEntryDom(textarea)
+		);
+	}
+
+	return new InputPair(
+		new OeInputData(entries),
+		new OeInputDom(entryDoms)
+	);
+}
+
+// =============================================================================
+
+function requestData() {
+	let rawData = window.prompt("Paste in the data obtained via the extractor script");
+
+	let userData;
 	try {
-		for (let questionData of data) {
-			let {
-				number,
-				input
-			} = questionData;
+		userData = JSON.parse(rawData);
+	} catch (syntaxError) {
+		E("Unreadable input");
+		E(syntaxError, false);
+		return null;
+	}
 
-			console.log(`>>> Importing what was question #${number}:`);
+	D(userData, false);
+	return userData;
+}
 
-			switch (input.type) {
-				case "oe":
-					tryImportOe(questionHolders, questionData);
-				default:
-					console.warn("[!] Unrecognised input type in question data!");
-			}
+function useData(userData, pageData, doms) {
+	try {
+		let questionNumber = 0;
+
+		for (let userQuestionData of userData) {
+			questionNumber++;
+			L(`Importing what was question #${questionNumber}:`);
+
+			tryImport(userQuestionData, pageData, doms);
 		}
 	} catch (error) {
-		console.error("ERR Bad input!");
-		console.error(error);
+		E("Bad input");
+		E(error, false);
 	}
+}
+function tryImport(userQuestionData, pageData, doms) {
+	D(userQuestionData);
+
+	let success = false;
+	for (let i = 0; i < pageData.length; i++) {
+		let pageQuestionData = pageData[i];
+		let dom = doms[i];
+
+		if (
+			userQuestionData.headerText !== pageQuestionData.headerText
+			|| userQuestionData.bodyText !== pageQuestionData.bodyText
+		) {
+			continue;
+		}
+
+		let userInputData = userQuestionData.inputData;
+		let pageInputData = pageQuestionData.inputData;
+		let inputDom = dom.inputDom;
+
+		if (userInputData.type !== pageInputData.type) continue;
+
+		switch (userInputData.type) {
+			case "oe":
+				success = tryImportOe(userInputData, pageInputData, inputDom);
+				break;
+			default:
+				W("Input data type in user question data not recognised");
+				break;
+		}
+
+		if (success) break;
+	}
+
+	if (!success) W("User question data not applicable");
+}
+function tryImportOe(userInputData, pageInputData, inputDom) {
+	//TODO
+}
+
+(() => {
+	let doms = [];
+	let pageData = assembleData("quiz-question-all", doms);
+	if (pageData === null) return;
+
+	let userData = requestData();
+	if (userData === null) return;
+
+	useData(userData, pageData, doms);
 })();

@@ -130,8 +130,8 @@ function D(content, addText = true) {
 	console.debug(content);
 }
 
-function findQuestionHolders() {
-	let quizHolder = document.getElementsByTagName("quiz-question-results")?.[0];
+function assembleData(quizHolderTag = "quiz-question-results", doms = []) {
+	let quizHolder = document.getElementsByTagName(quizHolderTag)?.[0];
 	if (quizHolder === undefined) {
 		E("No quiz holder found in page");
 		return null;
@@ -143,13 +143,8 @@ function findQuestionHolders() {
 		return null;
 	}
 
-	return questionHolders;
-}
-
-function assembleData(questionHolders, doms = []) {
 	let data = [];
 	let questionNumber = 0;
-
 	for (let questionHolder of questionHolders) {
 		questionNumber++;
 		L(`Extracting question #${questionNumber}:`);
@@ -161,7 +156,6 @@ function assembleData(questionHolders, doms = []) {
 		}
 
 		let headerText = header.innerText;
-
 
 		let question = questionHolder.getElementsByClassName("question")?.[0];
 		let bodyText = null;
@@ -192,6 +186,13 @@ function assembleData(questionHolders, doms = []) {
 		doms.push(questionDom);
 	}
 
+	if (data.length === 0) {
+		E("No data found in question holders");
+		return null;
+	}
+
+	D(data, false);
+	D(doms, false);
 	return data;
 }
 function tryExtractOe(questionHolder) {
@@ -212,7 +213,7 @@ function tryExtractOe(questionHolder) {
 	for (let input of inputs) {
 		let textarea = Array.from(input.children).filter(child => child.tagName === "TEXTAREA")?.[0];
 		if (textarea === undefined) {
-			W("No textarea found in input!");
+			W("No textarea found in input");
 			continue;
 		}
 
@@ -235,11 +236,8 @@ function tryExtractOe(questionHolder) {
 // =============================================================================
 
 (() => {
-	let questionHolders = findQuestionHolders();
-	if (questionHolders === null) return;
+	let data = assembleData();
+	if (data === null) return;
 
-	let data = assembleData(questionHolders);
-
-	D(data, false);
 	L(JSON.stringify(data), false);
 })();
