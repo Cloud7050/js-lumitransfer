@@ -19,21 +19,21 @@ class QuestionDom {
 	) {
 		Object.assign(
 			this,
-			{
-				inputDom
-			}
+			{ inputDom }
 		);
 	}
 }
 
 class InputData {
 	constructor(
-		type
+		type,
+		entries
 	) {
 		Object.assign(
 			this,
 			{
-				type
+				type,
+				entries
 			}
 		);
 	}
@@ -41,44 +41,72 @@ class InputData {
 
 class BlanksInputData extends InputData {
 	constructor(
-		referenceText,
-		entries
+		entries,
+		referenceText
 	) {
-		// Angular fill in blanks
-		super("fib");
+		// Angular fill-in-blanks
+		super(
+			"fib",
+			entries
+		);
 
 		Object.assign(
 			this,
-			{
-				referenceText,
-				entries
-			}
+			{ referenceText }
 		);
 	}
 }
 
-class BlanksInputDom {
+class ResponsesInputData extends InputData {
+	constructor(
+		entries
+	) {
+		// Angular multiple response question
+		super(
+			"mrq",
+			entries
+		);
+	}
+}
+
+class InputDom {
 	constructor(
 		entryDoms
 	) {
 		Object.assign(
 			this,
-			{
-				entryDoms
-			}
+			{ entryDoms }
 		);
 	}
 }
 
-class BlanksEntryData {
+class BlanksInputDom extends InputDom {}
+
+class ResponsesInputDom extends InputDom {}
+
+class EntryData {
 	constructor(
 		value
 	) {
 		Object.assign(
 			this,
-			{
-				value
-			}
+			{ value }
+		);
+	}
+}
+
+class BlanksEntryData extends EntryData {}
+
+class ResponsesEntryData extends EntryData {
+	constructor(
+		value,
+		entryText
+	) {
+		super(value);
+
+		Object.assign(
+			this,
+			{ entryText }
 		);
 	}
 }
@@ -89,9 +117,18 @@ class BlanksEntryDom {
 	) {
 		Object.assign(
 			this,
-			{
-				control
-			}
+			{ control }
+		);
+	}
+}
+
+class ResponsesEntryDom {
+	constructor(
+		checkbox
+	) {
+		Object.assign(
+			this,
+			{ checkbox }
 		);
 	}
 }
@@ -159,7 +196,8 @@ function assembleData(quizHolderTag, doms = []) {
 		let mainText = extractMainText(header);
 		if (mainText === null) continue;
 
-		let inputPair = tryExtractBlanks(questionHolder);
+		let inputPair = tryExtractBlanks(questionHolder)
+			?? tryExtractResponses(questionHolder);
 
 		if (inputPair === null) {
 			W("Contents in question holder not recognised");
@@ -211,7 +249,7 @@ function extractMainText(header) {
 function tryExtractBlanks(questionHolder) {
 	let blanksHolder = questionHolder.getElementsByTagName("question-view-fib")?.[0];
 	if (blanksHolder === undefined) {
-		D("No blanks holder found in question holder, not fill in blanks");
+		D("No blanks holder found in question holder, not fill-in-blanks");
 		return null;
 	}
 
@@ -220,15 +258,9 @@ function tryExtractBlanks(questionHolder) {
 	if (question === undefined) L("No question found in blanks holder");
 	else referenceText = question.innerText;
 
-	let inputHolder = blanksHolder.getElementsByClassName("input-container")?.[0];
-	if (inputHolder === undefined) {
-		W("No input holder found in blanks holder");
-		return null;
-	}
-
-	let inputs = Array.from(inputHolder.children).filter(child => child.classList.contains("input"));
+	let inputs = blanksHolder.getElementsByClassName("input");
 	if (inputs.length === 0) {
-		W("No inputs found in input holder");
+		W("No inputs found in blanks holder");
 		return null;
 	}
 
@@ -238,10 +270,10 @@ function tryExtractBlanks(questionHolder) {
 		let children = Array.from(input.children);
 
 		// Results have an additional textarea
-		let textarea = children.filter(child => child.tagName === "TEXTAREA")?.[0];
+		let textarea = input.getElementsByClassName("answer-fib")?.[0];
 		let value = textarea?.value ?? null;
 
-		let control = children.filter(child => child.tagName === "INPUT")?.[0];
+		let control = input.getElementsByClassName("form-control")?.[0];
 		if (control === undefined) {
 			W("No control found in input");
 			continue;
@@ -257,10 +289,62 @@ function tryExtractBlanks(questionHolder) {
 
 	return new InputPair(
 		new BlanksInputData(
-			referenceText,
-			entries
+			entries,
+			referenceText
 		),
 		new BlanksInputDom(entryDoms)
+	);
+}
+function tryExtractResponses(questionHolder) {
+	let responsesHolder = questionHolder.getElementsByTagName("question-view-mrq")?.[0];
+	if (responsesHolder === undefined) {
+		D("No responses holder found in question holder, not MRQ");
+		return null;
+	}
+
+	let options = responsesHolder.getElementsByClassName("option-content");
+	if (options.length === 0) {
+		W("No options found in responses holder");
+		return null;
+	}
+
+	let entries = [];
+	let entryDoms = [];
+	for (let option of options) {
+		let textHolder = option.getElementsByClassName("text")?.[0];
+		if (textHolder === undefined) {
+			W("No text holder found in option");
+			continue;
+		}
+
+		let entryText = textHolder.innerText;
+		if (entryText.length === 0) {
+			W("No entry text found in text holder");
+			continue;
+		}
+
+		let checkbox = option.getElementsByTagName("input")?.[0];
+		if (checkbox === undefined) {
+			W("No checkbox found in option");
+			continue;
+		}
+
+		let value = checkbox.value;
+
+		entries.push(
+			new ResponsesEntryData(
+				value,
+				entryText
+			)
+		);
+		entryDoms.push(
+			new ResponsesEntryDom(checkbox)
+		);
+	}
+
+	return new InputPair(
+		new ResponsesInputData(entries),
+		new ResponsesInputDom(entryDoms)
 	);
 }
 
@@ -323,7 +407,7 @@ function singleImport(userQuestionData, pageData, doms) {
 				break;
 			default:
 				W("Input data type in user question data not recognised");
-				break;
+				return;
 		}
 
 		if (success) {
