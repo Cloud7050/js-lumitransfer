@@ -39,12 +39,13 @@ class InputData {
 	}
 }
 
-class OeInputData extends InputData {
+class BlanksInputData extends InputData {
 	constructor(
 		referenceText,
 		entries
 	) {
-		super("oe");
+		// Angular fill-in-blanks
+		super("fib");
 
 		Object.assign(
 			this,
@@ -56,7 +57,7 @@ class OeInputData extends InputData {
 	}
 }
 
-class OeInputDom {
+class BlanksInputDom {
 	constructor(
 		entryDoms
 	) {
@@ -69,7 +70,7 @@ class OeInputDom {
 	}
 }
 
-class OeEntryData {
+class BlanksEntryData {
 	constructor(
 		value
 	) {
@@ -82,7 +83,7 @@ class OeEntryData {
 	}
 }
 
-class OeEntryDom {
+class BlanksEntryDom {
 	constructor(
 		control
 	) {
@@ -158,7 +159,7 @@ function assembleData(quizHolderTag, doms = []) {
 		let mainText = extractMainText(header);
 		if (mainText === null) continue;
 
-		let inputPair = tryExtractOe(questionHolder);
+		let inputPair = tryExtractBlanks(questionHolder);
 
 		if (inputPair === null) {
 			W("Contents in question holder not recognised");
@@ -207,21 +208,21 @@ function extractMainText(header) {
 
 	return mainText;
 }
-function tryExtractOe(questionHolder) {
-	let oeHolder = questionHolder.getElementsByTagName("question-view-fib")?.[0];
-	if (oeHolder === undefined) {
-		D("No OE holder found in question holder, not OE");
+function tryExtractBlanks(questionHolder) {
+	let blanksHolder = questionHolder.getElementsByTagName("question-view-fib")?.[0];
+	if (blanksHolder === undefined) {
+		D("No blanks holder found in question holder, not fill-in-blanks");
 		return null;
 	}
 
-	let question = oeHolder.getElementsByClassName("question")?.[0];
+	let question = blanksHolder.getElementsByClassName("question")?.[0];
 	let referenceText = null;
-	if (question === undefined) L("No question found in OE holder");
+	if (question === undefined) L("No question found in blanks holder");
 	else referenceText = question.innerText;
 
-	let inputHolder = oeHolder.getElementsByClassName("input-container")?.[0];
+	let inputHolder = blanksHolder.getElementsByClassName("input-container")?.[0];
 	if (inputHolder === undefined) {
-		W("No input holder found in OE holder");
+		W("No input holder found in blanks holder");
 		return null;
 	}
 
@@ -247,19 +248,19 @@ function tryExtractOe(questionHolder) {
 		}
 
 		entries.push(
-			new OeEntryData(value)
+			new BlanksEntryData(value)
 		);
 		entryDoms.push(
-			new OeEntryDom(control)
+			new BlanksEntryDom(control)
 		);
 	}
 
 	return new InputPair(
-		new OeInputData(
+		new BlanksInputData(
 			referenceText,
 			entries
 		),
-		new OeInputDom(entryDoms)
+		new BlanksInputDom(entryDoms)
 	);
 }
 

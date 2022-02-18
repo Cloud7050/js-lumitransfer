@@ -4,7 +4,7 @@ This easy-to-use pair of scripts aims to make transferring LumiNUS quiz answers 
 
 Helpful for:
 
-- Quizzes that need individual pasting (eg many open-ended blanks)
+- Quizzes that need individual pasting (eg many fill-in-blanks)
 - Quizzes that need many attempts (eg not showing per-question marks)
 - Quizzes that randomly order their questions & answers
 - Quizzes that are simply long
