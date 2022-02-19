@@ -109,7 +109,7 @@ class ResponsesEntryData extends MultiEntryData {}
 
 class ChoicesEntryData extends MultiEntryData {}
 
-class BlanksEntryElements {
+class EntryElements {
 	constructor(control) {
 		Object.assign(
 			this,
@@ -118,23 +118,11 @@ class BlanksEntryElements {
 	}
 }
 
-class ResponsesEntryElements {
-	constructor(checkbox) {
-		Object.assign(
-			this,
-			{ checkbox }
-		);
-	}
-}
+class BlanksEntryElements extends EntryElements {}
 
-class ChoicesEntryElements {
-	constructor(button) {
-		Object.assign(
-			this,
-			{ button }
-		);
-	}
-}
+class ResponsesEntryElements extends EntryElements {}
+
+class ChoicesEntryElements extends EntryElements {}
 
 class Mode {
 	constructor(
@@ -618,7 +606,7 @@ function tryImportResponses(
 			if (
 				storedEntryData.text === destinationEntryData.text
 			) {
-				orderedCheckboxes.push(destinationEntryElement.checkbox)
+				orderedCheckboxes.push(destinationEntryElement.control)
 				continue outerLoop;
 			}
 		}
