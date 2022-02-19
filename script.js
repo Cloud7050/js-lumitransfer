@@ -141,13 +141,13 @@ class ChoicesEntryElements extends EntryElements {}
 
 class Mode {
 	constructor(
-		extractMode,
+		extractorMode,
 		questionHolders
 	) {
 		Object.assign(
 			this,
 			{
-				extractMode,
+				extractorMode,
 				questionHolders
 			}
 		);
@@ -219,7 +219,7 @@ function getByClass(parent, className, returnFirstElement = true) {
 }
 
 function detectMode() {
-	let extractMode = true;
+	let extractorMode = true;
 
 	let quizHolder = getByTag(document, "quiz-question-results");
 	if (quizHolder !== null) {
@@ -233,7 +233,7 @@ function detectMode() {
 		}
 
 		// Ongoing quiz holder
-		extractMode = false;
+		extractorMode = false;
 		L("📥 Using importer mode");
 	}
 
@@ -244,7 +244,7 @@ function detectMode() {
 	}
 
 	return new Mode(
-		extractMode,
+		extractorMode,
 		questionHolders
 	);
 }
@@ -706,7 +706,7 @@ function retrieveData() {
 	let mode = detectMode();
 	if (mode === null) return;
 
-	if (mode.extractMode) {
+	if (mode.extractorMode) {
 		let questionPairs = extract(mode.questionHolders);
 		if (questionPairs === null) return;
 
