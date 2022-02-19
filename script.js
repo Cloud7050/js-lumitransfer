@@ -1,13 +1,13 @@
 const QuestionType = {
 	// Angular fill-in-blanks
-	blanks: "fib",
+	BLANKS: "fib",
 
 	// Angular multiple response question
-	responses: "mrq",
+	RESPONSES: "mrq",
 
 	// Angular multiple choice question
 	// Angular true or false
-	choices: "mcq-tof"
+	CHOICES: "mcq-tof"
 }
 
 class QuestionData {
@@ -55,7 +55,7 @@ class BlanksInputData extends InputData {
 		referenceText
 	) {
 		super(
-			QuestionType.blanks,
+			QuestionType.BLANKS,
 			entriesData
 		);
 
@@ -69,7 +69,7 @@ class BlanksInputData extends InputData {
 class ResponsesInputData extends InputData {
 	constructor(entriesData) {
 		super(
-			QuestionType.responses,
+			QuestionType.RESPONSES,
 			entriesData
 		);
 	}
@@ -78,7 +78,7 @@ class ResponsesInputData extends InputData {
 class ChoicesInputData extends InputData {
 	constructor(entriesData) {
 		super(
-			QuestionType.choices,
+			QuestionType.CHOICES,
 			entriesData
 		);
 	}
@@ -540,21 +540,21 @@ function importOne(storedQuestionData, destinationData, destinationElements) {
 		if (storedInputData.type !== destinationInputData.type) continue;
 
 		switch (storedInputData.type) {
-			case QuestionType.blanks:
+			case QuestionType.BLANKS:
 				success = tryImportBlanks(
 					storedInputData,
 					destinationInputData,
 					destinationInputElements
 				);
 				break;
-			case QuestionType.responses:
+			case QuestionType.RESPONSES:
 				success = tryImportResponses(
 					storedInputData,
 					destinationInputData,
 					destinationInputElements
 				);
 				break;
-			case QuestionType.choices:
+			case QuestionType.CHOICES:
 				success = tryImportChoices(
 					storedInputData,
 					destinationInputData,
