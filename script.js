@@ -14,9 +14,7 @@ class QuestionData {
 }
 
 class QuestionElements {
-	constructor(
-		inputElements
-	) {
+	constructor(inputElements) {
 		Object.assign(
 			this,
 			{ inputElements }
@@ -25,55 +23,58 @@ class QuestionElements {
 }
 
 class InputData {
-	constructor(
-		type,
-		entriesData
-	) {
+	constructor(type) {
 		Object.assign(
 			this,
-			{
-				type,
-				entriesData
-			}
+			{ type }
 		);
 	}
 }
 
 class BlanksInputData extends InputData {
 	constructor(
-		entriesData,
-
-		referenceText
+		referenceText,
+		entriesData
 	) {
 		// Angular fill-in-blanks
-		super(
-			"fib",
-			entriesData
-		);
+		super("fib");
 
 		Object.assign(
 			this,
-			{ referenceText }
+			{
+				referenceText,
+				entriesData
+			}
 		);
 	}
 }
 
 class ResponsesInputData extends InputData {
-	constructor(
-		entriesData
-	) {
+	constructor(entriesData) {
 		// Angular multiple response question
-		super(
-			"mrq",
-			entriesData
+		super("mrq");
+
+		Object.assign(
+			this,
+			{ entriesData }
+		);
+	}
+}
+
+class ChoicesInputData extends InputData {
+	constructor(entryData) {
+		// Angular true or false
+		super("tof");
+
+		Object.assign(
+			this,
+			{ entryData }
 		);
 	}
 }
 
 class InputElements {
-	constructor(
-		entriesElements
-	) {
+	constructor(entriesElements) {
 		Object.assign(
 			this,
 			{ entriesElements }
@@ -85,10 +86,10 @@ class BlanksInputElements extends InputElements {}
 
 class ResponsesInputElements extends InputElements {}
 
+class ChoicesInputElements extends InputElements {}
+
 class BlanksEntryData {
-	constructor(
-		value
-	) {
+	constructor(value) {
 		Object.assign(
 			this,
 			{ value }
@@ -111,10 +112,17 @@ class ResponsesEntryData {
 	}
 }
 
+class ChoicesEntryData {
+	constructor(text) {
+		Object.assign(
+			this,
+			{ text }
+		);
+	}
+}
+
 class BlanksEntryElements {
-	constructor(
-		control
-	) {
+	constructor(control) {
 		Object.assign(
 			this,
 			{ control }
@@ -123,12 +131,19 @@ class BlanksEntryElements {
 }
 
 class ResponsesEntryElements {
-	constructor(
-		checkbox
-	) {
+	constructor(checkbox) {
 		Object.assign(
 			this,
 			{ checkbox }
+		);
+	}
+}
+
+class ChoicesEntryElements {
+	constructor(button) {
+		Object.assign(
+			this,
+			{ button }
 		);
 	}
 }
@@ -263,7 +278,8 @@ function extract(questionHolders) {
 		if (mainText === null) continue;
 
 		let inputPair = tryExtractBlanks(questionHolder)
-			?? tryExtractResponses(questionHolder);
+			?? tryExtractResponses(questionHolder)
+			?? tryExtractChoices(questionHolder);
 		if (inputPair === null) {
 			W("⚠️ Question type not supported");
 			continue;
@@ -355,15 +371,14 @@ function tryExtractBlanks(questionHolder) {
 	}
 
 	if (entriesData.length === 0) {
-		E("No extractable entries found in question holder");
+		W("No extractable entries found in question holder");
 		return null;
 	}
 
 	return new InputPair(
 		new BlanksInputData(
-			entriesData,
-
-			referenceText
+			referenceText,
+			entriesData
 		),
 		new BlanksInputElements(entriesElements)
 	);
@@ -427,13 +442,80 @@ function tryExtractResponses(questionHolder) {
 	}
 
 	if (entriesData.length === 0) {
-		E("No extractable entries found in question holder");
+		W("No extractable entries found in question holder");
 		return null;
 	}
 
 	return new InputPair(
 		new ResponsesInputData(entriesData),
 		new ResponsesInputElements(entriesElements)
+	);
+}
+function tryExtractChoices(questionHolder) {
+	let choicesHolder = getByTag(questionHolder, "question-view-tof");
+	if (choicesHolder === null) return null;
+
+	let options = getByClass(choicesHolder, "option-content", false);
+	if (options.length === 0) {
+		W("No options found in choices holder");
+		return null;
+	}
+
+	let entryData = null;
+	let entriesElements = [];
+	for (let option of options) {
+		let textHolder = getByClass(option, "text");
+		if (textHolder === null) {
+			W("No text holder found in option");
+			continue;
+		}
+
+		let text = textHolder.innerText.trim();
+		if (text.length === 0) {
+			W("No text found in text holder");
+			continue;
+		}
+
+		let buttonHolder = getByClass(option, "radio");
+		if (buttonHolder === null) {
+			W("No button holder found in option");
+			continue;
+		}
+
+		let span = getByTag(buttonHolder, "span");
+		if (span === null) {
+			W("No span found in button holder");
+			continue;
+		}
+
+		let styleDeclaration = window.getComputedStyle(span, "::before");
+		let backgroundColour = styleDeclaration.getPropertyValue("background-color");
+		let checked = backgroundColour === "rgb(144, 144, 144)";
+
+		let button = getByTag(buttonHolder, "input");
+		if (button === null) {
+			W("No button found in button holder");
+			continue;
+		}
+
+		if (checked) entryData = new ChoicesEntryData(text);
+		entriesElements.push(
+			new ChoicesEntryElements(button)
+		);
+	}
+
+	if (entriesElements.length === 0) {
+		W("No extractable entries found in question holder");
+		return null;
+	}
+	if (entryData === null) {
+		W("No checked button found in question holder");
+		return null;
+	}
+
+	return new InputPair(
+		new ChoicesInputData(entryData),
+		new ChoicesInputElements(entriesElements)
 	);
 }
 
