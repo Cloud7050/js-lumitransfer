@@ -42,6 +42,7 @@ class InputData {
 class BlanksInputData extends InputData {
 	constructor(
 		entries,
+
 		referenceText
 	) {
 		// Angular fill-in-blanks
@@ -273,12 +274,14 @@ function extract(questionHolders) {
 			inputPair.inputData
 		);
 		D(questionData, false);
+
 		data.push(questionData);
 		elements.push(
 			new QuestionElements(
 				inputPair.inputElements
 			)
 		);
+
 		questionsExtracted++;
 	}
 
@@ -288,6 +291,7 @@ function extract(questionHolders) {
 	}
 
 	L(`Extracted ${questionsExtracted}/${questionCounter} question(s)`);
+
 	let questionPairs = new QuestionPairs(
 		data,
 		elements
@@ -329,8 +333,8 @@ function tryExtractBlanks(questionHolder) {
 		return null;
 	}
 
-	let data = [];
-	let elements = [];
+	let entries = [];
+	let entryElements = [];
 	for (let input of inputs) {
 		// Results have an additional textarea
 		let textarea = getByClass(input, "answer-fib");
@@ -342,20 +346,26 @@ function tryExtractBlanks(questionHolder) {
 			continue;
 		}
 
-		data.push(
+		entries.push(
 			new BlanksEntryData(value)
 		);
-		elements.push(
+		entryElements.push(
 			new BlanksEntryElements(control)
 		);
 	}
 
+	if (entries.length === 0) {
+		E("No extractable entries found in question holder");
+		return null;
+	}
+
 	return new InputPair(
 		new BlanksInputData(
-			data,
+			entries,
+
 			referenceText
 		),
-		new BlanksInputElements(elements)
+		new BlanksInputElements(entryElements)
 	);
 }
 function tryExtractResponses(questionHolder) {
@@ -368,8 +378,8 @@ function tryExtractResponses(questionHolder) {
 		return null;
 	}
 
-	let data = [];
-	let elements = [];
+	let entries = [];
+	let entryElements = [];
 	for (let option of options) {
 		let textHolder = getByClass(option, "text");
 		if (textHolder === null) {
@@ -405,28 +415,131 @@ function tryExtractResponses(questionHolder) {
 			continue;
 		}
 
-		data.push(
+		entries.push(
 			new ResponsesEntryData(
 				text,
 				checked
 			)
 		);
-		elements.push(
+		entryElements.push(
 			new ResponsesEntryElements(checkbox)
 		);
 	}
 
+	if (entries.length === 0) {
+		E("No extractable entries found in question holder");
+		return null;
+	}
+
 	return new InputPair(
-		new ResponsesInputData(data),
-		new ResponsesInputElements(elements)
+		new ResponsesInputData(entries),
+		new ResponsesInputElements(entryElements)
 	);
+}
+
+function importUsing(storedData, questionPairs) {
+	let questionsImported = 0;
+	let questionCounter = 0;
+
+	for (let storedQuestionData of storedData) {
+		questionCounter++;
+		L(`Importing stored question #${questionCounter}...`);
+
+		try {
+			let success = importOne(storedQuestionData, questionPairs.data, questionPairs.elements);
+			if (success) questionsImported++;
+		} catch (error) {
+			E("Stored question data is in wrong format");
+			E(error, false);
+		}
+	}
+
+	L(`Imported ${questionsImported}/${questionCounter} question(s)`);
+}
+function importOne(storedQuestionData, destinationData, destinationElements) {
+	let success = false;
+	for (let i = 0; i < destinationData.length; i++) {
+		let destinationQuestionData = destinationData[i];
+		let destinationQuestionElements = destinationElements[i];
+
+		if (storedQuestionData.mainText !== destinationQuestionData.mainText) continue;
+
+		let storedInputData = storedQuestionData.inputData;
+		let destinationInputData = destinationQuestionData.inputData;
+		let destinationInputElements = destinationQuestionElements.inputElements;
+
+		if (storedInputData.type !== destinationInputData.type) continue;
+
+		switch (storedInputData.type) {
+			case "fib":
+				success = tryImportBlanks(
+					storedInputData,
+					destinationInputData,
+					destinationInputElements
+				);
+				break;
+			default:
+				W("Stored question type not supported");
+				return false;
+		}
+
+		if (success) {
+			// Remove for efficiency
+			destinationData.splice(i, 1);
+			destinationElements.splice(i, 1);
+			break;
+		};
+	}
+
+	if (!success) W("No matches for stored question data");
+
+	return success;
+}
+
+function tryImportBlanks(
+	storedInputData,
+	destinationInputData,
+	destinationInputElements
+) {
+	if (storedInputData.referenceText !== destinationInputData.referenceText) return false;
+
+	let storedEntries = storedInputData.entries;
+	let destinationEntryElements = destinationInputElements.entryElements;
+	for (let i = 0; i < storedEntries.length; i++) {
+		let entryData = storedEntries[i];
+		let entryDom = destinationEntryElements[i];
+
+		entryDom.control.value = entryData.value;
+	}
+
+	return true;
 }
 
 function storeData(data) {
 	localStorage.setItem(
-		"userData",
+		"LumiTransfer",
 		JSON.stringify(data)
 	);
+}
+
+function retrieveData() {
+	let rawData = localStorage.getItem("LumiTransfer");
+	if (rawData === null) {
+		E("⛔ No stored data found. Run this script on the quiz results to extract from first");
+		return null;
+	}
+
+	let data;
+	try {
+		data = JSON.parse(rawData);
+	} catch (syntaxError) {
+		E("Stored data unreadable");
+		E(syntaxError, false);
+		return null;
+	}
+
+	D(data, false);
+	return data;
 }
 
 (() => {
@@ -438,8 +551,15 @@ function storeData(data) {
 		if (questionPairs === null) return;
 
 		storeData(questionPairs.data);
-		L("✅ Data extracted & stored. Run this script again in the page to import into");
+		L("✅ Data extracted & stored. Run this script again on the ongoing quiz to import into");
 	} else {
-		//TODO
+		let storedData = retrieveData();
+		if (storedData === null) return;
+
+		let questionPairs = extract(mode.questionHolders);
+		if (questionPairs === null) return;
+
+		importUsing(storedData, questionPairs);
+		L("✅ Data retrieved & imported. Matching questions overwritten");
 	}
 })();
