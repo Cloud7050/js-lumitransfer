@@ -9,7 +9,7 @@ Helpful for:
 - Quizzes that randomly order their questions & answers
 - Quizzes that are simply long
 
-**Currently only supports fill-in-blanks questions.** MRQ support almost done. MCQ support may come too.
+**Currently supports fill-in-blanks questions & MRQs.** MCQ support may come soon.
 
 ⚠️ Strictly not to be used for academic dishonesty!
 

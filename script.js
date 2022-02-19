@@ -27,13 +27,13 @@ class QuestionElements {
 class InputData {
 	constructor(
 		type,
-		entries
+		entriesData
 	) {
 		Object.assign(
 			this,
 			{
 				type,
-				entries
+				entriesData
 			}
 		);
 	}
@@ -41,14 +41,14 @@ class InputData {
 
 class BlanksInputData extends InputData {
 	constructor(
-		entries,
+		entriesData,
 
 		referenceText
 	) {
 		// Angular fill-in-blanks
 		super(
 			"fib",
-			entries
+			entriesData
 		);
 
 		Object.assign(
@@ -60,23 +60,23 @@ class BlanksInputData extends InputData {
 
 class ResponsesInputData extends InputData {
 	constructor(
-		entries
+		entriesData
 	) {
 		// Angular multiple response question
 		super(
 			"mrq",
-			entries
+			entriesData
 		);
 	}
 }
 
 class InputElements {
 	constructor(
-		entryElements
+		entriesElements
 	) {
 		Object.assign(
 			this,
-			{ entryElements }
+			{ entriesElements }
 		);
 	}
 }
@@ -333,8 +333,8 @@ function tryExtractBlanks(questionHolder) {
 		return null;
 	}
 
-	let entries = [];
-	let entryElements = [];
+	let entriesData = [];
+	let entriesElements = [];
 	for (let input of inputs) {
 		// Results have an additional textarea
 		let textarea = getByClass(input, "answer-fib");
@@ -346,26 +346,26 @@ function tryExtractBlanks(questionHolder) {
 			continue;
 		}
 
-		entries.push(
+		entriesData.push(
 			new BlanksEntryData(value)
 		);
-		entryElements.push(
+		entriesElements.push(
 			new BlanksEntryElements(control)
 		);
 	}
 
-	if (entries.length === 0) {
+	if (entriesData.length === 0) {
 		E("No extractable entries found in question holder");
 		return null;
 	}
 
 	return new InputPair(
 		new BlanksInputData(
-			entries,
+			entriesData,
 
 			referenceText
 		),
-		new BlanksInputElements(entryElements)
+		new BlanksInputElements(entriesElements)
 	);
 }
 function tryExtractResponses(questionHolder) {
@@ -378,8 +378,8 @@ function tryExtractResponses(questionHolder) {
 		return null;
 	}
 
-	let entries = [];
-	let entryElements = [];
+	let entriesData = [];
+	let entriesElements = [];
 	for (let option of options) {
 		let textHolder = getByClass(option, "text");
 		if (textHolder === null) {
@@ -415,29 +415,35 @@ function tryExtractResponses(questionHolder) {
 			continue;
 		}
 
-		entries.push(
+		entriesData.push(
 			new ResponsesEntryData(
 				text,
 				checked
 			)
 		);
-		entryElements.push(
+		entriesElements.push(
 			new ResponsesEntryElements(checkbox)
 		);
 	}
 
-	if (entries.length === 0) {
+	if (entriesData.length === 0) {
 		E("No extractable entries found in question holder");
 		return null;
 	}
 
 	return new InputPair(
-		new ResponsesInputData(entries),
-		new ResponsesInputElements(entryElements)
+		new ResponsesInputData(entriesData),
+		new ResponsesInputElements(entriesElements)
 	);
 }
 
 function importUsing(storedData, questionPairs) {
+	// Clone for importOne() to splice later as questions get overwritten
+	questionPairs = new QuestionPairs(
+		[...questionPairs.data],
+		[...questionPairs.elements]
+	);
+
 	let questionsImported = 0;
 	let questionCounter = 0;
 
@@ -458,6 +464,7 @@ function importUsing(storedData, questionPairs) {
 }
 function importOne(storedQuestionData, destinationData, destinationElements) {
 	let success = false;
+
 	for (let i = 0; i < destinationData.length; i++) {
 		let destinationQuestionData = destinationData[i];
 		let destinationQuestionElements = destinationElements[i];
@@ -473,6 +480,13 @@ function importOne(storedQuestionData, destinationData, destinationElements) {
 		switch (storedInputData.type) {
 			case "fib":
 				success = tryImportBlanks(
+					storedInputData,
+					destinationInputData,
+					destinationInputElements
+				);
+				break;
+			case "mrq":
+				success = tryImportResponses(
 					storedInputData,
 					destinationInputData,
 					destinationInputElements
@@ -495,7 +509,6 @@ function importOne(storedQuestionData, destinationData, destinationElements) {
 
 	return success;
 }
-
 function tryImportBlanks(
 	storedInputData,
 	destinationInputData,
@@ -503,13 +516,53 @@ function tryImportBlanks(
 ) {
 	if (storedInputData.referenceText !== destinationInputData.referenceText) return false;
 
-	let storedEntries = storedInputData.entries;
-	let destinationEntryElements = destinationInputElements.entryElements;
-	for (let i = 0; i < storedEntries.length; i++) {
-		let entryData = storedEntries[i];
-		let entryDom = destinationEntryElements[i];
+	let storedEntriesData = storedInputData.entriesData;
+	let destinationEntriesElements = destinationInputElements.entriesElements;
+	for (let i = 0; i < storedEntriesData.length; i++) {
+		let entryData = storedEntriesData[i];
+		let entryElements = destinationEntriesElements[i];
 
-		entryDom.control.value = entryData.value;
+		entryElements.control.value = entryData.value;
+	}
+
+	return true;
+}
+function tryImportResponses(
+	storedInputData,
+	destinationInputData,
+	destinationInputElements
+) {
+	let storedEntriesData = storedInputData.entriesData;
+	let destinationEntriesData = destinationInputData.entriesData;
+	let destinationEntriesElements = destinationInputElements.entriesElements;
+
+	let orderedCheckboxes = [];
+
+	// Check if all entries have a match.
+	// Eg question main text may be identical for different sets of entries
+	outerLoop:
+	for (let storedEntryData of storedEntriesData) {
+		for (let i = 0; i < destinationEntriesData.length; i++) {
+			let destinationEntryData = destinationEntriesData[i];
+			let destinationEntryElement = destinationEntriesElements[i];
+
+			if (
+				storedEntryData.text === destinationEntryData.text
+			) {
+				orderedCheckboxes.push(destinationEntryElement.checkbox)
+				continue outerLoop;
+			}
+		}
+
+		return false;
+	}
+
+	// Safe to start overwriting
+	for (let i = 0; i < storedEntriesData.length; i++) {
+		let storedEntryData = storedEntriesData[i];
+		let checkbox = orderedCheckboxes[i];
+
+		checkbox.checked = storedEntryData.checked;
 	}
 
 	return true;
