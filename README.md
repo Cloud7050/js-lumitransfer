@@ -29,7 +29,7 @@ You do not need to download/install anything or know how to code to use these sc
 
 If you keep the script copied to your clipboard, it should be pretty easy to rapidly extract & import your quiz answers back-to-back as you make multiple similar attempts.
 
-Video showcase (older process): <https://youtu.be/VEKyakTH0CU>
+Video showcase: <https://youtu.be/pnGHU86THv4>
 
 ## Limitations
 
