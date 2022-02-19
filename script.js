@@ -111,13 +111,13 @@ class BlanksEntryData {
 class MultiEntryData {
 	constructor(
 		text,
-		check
+		checked
 	) {
 		Object.assign(
 			this,
 			{
 				text,
-				check
+				checked
 			}
 		);
 	}
@@ -631,7 +631,7 @@ function tryImportResponses(
 		let storedEntryData = storedEntriesData[i];
 		let checkbox = orderedCheckboxes[i];
 
-		checkbox.checked = storedEntryData.check;
+		checkbox.checked = storedEntryData.checked;
 	}
 
 	return true;
@@ -649,7 +649,7 @@ function tryImportChoices(
 
 	outerLoop:
 	for (let storedEntryData of storedEntriesData) {
-		let storeMatchingButton = storedEntryData.check;
+		let storeMatchingButton = storedEntryData.checked;
 
 		for (let i = 0; i < destinationEntriesData.length; i++) {
 			let destinationEntryData = destinationEntriesData[i];
