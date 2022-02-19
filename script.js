@@ -1,6 +1,12 @@
 const QuestionType = {
+	// Angular fill-in-blanks
 	blanks: "fib",
+
+	// Angular multiple response question
 	responses: "mrq",
+
+	// Angular multiple choice question
+	// Angular true or false
 	choices: "mcq-tof"
 }
 
@@ -48,7 +54,6 @@ class BlanksInputData extends InputData {
 		entriesData,
 		referenceText
 	) {
-		// Angular fill-in-blanks
 		super(
 			QuestionType.blanks,
 			entriesData
@@ -63,7 +68,6 @@ class BlanksInputData extends InputData {
 
 class ResponsesInputData extends InputData {
 	constructor(entriesData) {
-		// Angular multiple response question
 		super(
 			QuestionType.responses,
 			entriesData
@@ -73,8 +77,6 @@ class ResponsesInputData extends InputData {
 
 class ChoicesInputData extends InputData {
 	constructor(entriesData) {
-		// Angular multiple choice question
-		// Angular true or false
 		super(
 			QuestionType.choices,
 			entriesData
