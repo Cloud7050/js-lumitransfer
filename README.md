@@ -13,7 +13,7 @@ Supported question types:
 
 - Fill-in-blanks questions
 - Multiple Response Questions (MRQs)
-- Multiple Choice Questions (MCQs)
+- Multiple Choice Questions (MCQs) & true-or-false questions
 
 ⚠️ Strictly not to be used for academic dishonesty!
 

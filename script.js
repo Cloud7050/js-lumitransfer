@@ -1,7 +1,7 @@
 const QuestionType = {
 	blanks: "fib",
 	responses: "mrq",
-	choices: "tof"
+	choices: "mcq-tof"
 }
 
 class QuestionData {
@@ -73,6 +73,7 @@ class ResponsesInputData extends InputData {
 
 class ChoicesInputData extends InputData {
 	constructor(entriesData) {
+		// Angular multiple choice question
 		// Angular true or false
 		super(
 			QuestionType.choices,
@@ -435,7 +436,8 @@ function tryExtractResponses(questionHolder) {
 	);
 }
 function tryExtractChoices(questionHolder) {
-	let choicesHolder = getByTag(questionHolder, "question-view-tof");
+	let choicesHolder = getByTag(questionHolder, "question-view-mcq")
+		?? getByTag(questionHolder, "question-view-tof");
 	if (choicesHolder === null) return null;
 
 	let options = getByClass(choicesHolder, "option-content", false);
@@ -706,18 +708,15 @@ function retrieveData() {
 	let mode = detectMode();
 	if (mode === null) return;
 
-	if (mode.extractorMode) {
-		let questionPairs = extract(mode.questionHolders);
-		if (questionPairs === null) return;
+	let questionPairs = extract(mode.questionHolders);
+	if (questionPairs === null) return;
 
+	if (mode.extractorMode) {
 		storeData(questionPairs.data);
 		L("✅ Data extracted & stored. Run this script again on the ongoing quiz to import into");
 	} else {
 		let storedData = retrieveData();
 		if (storedData === null) return;
-
-		let questionPairs = extract(mode.questionHolders);
-		if (questionPairs === null) return;
 
 		importUsing(storedData, questionPairs);
 		L("✅ Data retrieved & imported. Matching questions overwritten");
