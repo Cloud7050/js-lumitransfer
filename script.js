@@ -23,28 +23,31 @@ class QuestionElements {
 }
 
 class InputData {
-	constructor(type) {
+	constructor(
+		type,
+		entriesData
+	) {
 		Object.assign(
 			this,
-			{ type }
+			{
+				type,
+				entriesData
+			}
 		);
 	}
 }
 
 class BlanksInputData extends InputData {
 	constructor(
-		referenceText,
-		entriesData
+		entriesData,
+		referenceText
 	) {
 		// Angular fill-in-blanks
-		super("fib");
+		super("fib", entriesData);
 
 		Object.assign(
 			this,
-			{
-				referenceText,
-				entriesData
-			}
+			{ referenceText }
 		);
 	}
 }
@@ -52,24 +55,14 @@ class BlanksInputData extends InputData {
 class ResponsesInputData extends InputData {
 	constructor(entriesData) {
 		// Angular multiple response question
-		super("mrq");
-
-		Object.assign(
-			this,
-			{ entriesData }
-		);
+		super("mrq", entriesData);
 	}
 }
 
 class ChoicesInputData extends InputData {
-	constructor(entryData) {
+	constructor(entriesData) {
 		// Angular true or false
-		super("tof");
-
-		Object.assign(
-			this,
-			{ entryData }
-		);
+		super("tof", entriesData);
 	}
 }
 
@@ -97,7 +90,7 @@ class BlanksEntryData {
 	}
 }
 
-class ResponsesEntryData {
+class MultiEntryData {
 	constructor(
 		text,
 		checked
@@ -112,14 +105,9 @@ class ResponsesEntryData {
 	}
 }
 
-class ChoicesEntryData {
-	constructor(text) {
-		Object.assign(
-			this,
-			{ text }
-		);
-	}
-}
+class ResponsesEntryData extends MultiEntryData {}
+
+class ChoicesEntryData extends MultiEntryData {}
 
 class BlanksEntryElements {
 	constructor(control) {
@@ -377,8 +365,8 @@ function tryExtractBlanks(questionHolder) {
 
 	return new InputPair(
 		new BlanksInputData(
-			referenceText,
-			entriesData
+			entriesData,
+			referenceText
 		),
 		new BlanksInputElements(entriesElements)
 	);
@@ -453,7 +441,8 @@ function tryExtractChoices(questionHolder) {
 		return null;
 	}
 
-	let entryData = null;
+	let hasChecked = false;
+	let entriesData = [];
 	let entriesElements = [];
 	for (let option of options) {
 		let textHolder = getByClass(option, "text");
@@ -482,7 +471,21 @@ function tryExtractChoices(questionHolder) {
 
 		let checked = button.checked;
 
-		if (checked) entryData = entryData ?? new ChoicesEntryData(text);
+		if (checked) {
+			if (hasChecked) {
+				W("Multiple checked buttons found in question holder");
+				return null;
+			}
+
+			hasChecked = true;
+		}
+
+		entriesData.push(
+			new ResponsesEntryData(
+				text,
+				checked
+			)
+		);
 		entriesElements.push(
 			new ChoicesEntryElements(button)
 		);
@@ -492,13 +495,13 @@ function tryExtractChoices(questionHolder) {
 		W("No extractable entries found in question holder");
 		return null;
 	}
-	if (entryData === null) {
+	if (!hasChecked) {
 		W("No checked button found in question holder");
 		return null;
 	}
 
 	return new InputPair(
-		new ChoicesInputData(entryData),
+		new ChoicesInputData(entriesData),
 		new ChoicesInputElements(entriesElements)
 	);
 }
