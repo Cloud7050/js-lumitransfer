@@ -309,7 +309,7 @@ function extractMainText(header) {
 		""
 	);
 
-	// Ignore marks, would not be present in results if per-question marks are hidden
+	// Ignore marks, would be missing from results if marks per question are hidden
 	mainText = /^([\s\S]+?)(?:\(\d*\.?\d* marks?\))?$/.exec(mainText)?.[1];
 	if (mainText === undefined) {
 		W("No main text found in header");
