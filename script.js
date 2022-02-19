@@ -414,21 +414,13 @@ function tryExtractResponses(questionHolder) {
 			continue;
 		}
 
-		let span = getByTag(checkboxHolder, "span");
-		if (span === null) {
-			W("No span found in checkbox holder");
-			continue;
-		}
-
-		let styleDeclaration = window.getComputedStyle(span, "::before");
-		let backgroundImage = styleDeclaration.getPropertyValue("background-image");
-		let checked = backgroundImage !== "none";
-
 		let checkbox = getByTag(checkboxHolder, "input");
 		if (checkbox === null) {
 			W("No checkbox found in checkbox holder");
 			continue;
 		}
+
+		let checked = checkbox.checked;
 
 		entriesData.push(
 			new ResponsesEntryData(
@@ -482,23 +474,15 @@ function tryExtractChoices(questionHolder) {
 			continue;
 		}
 
-		let span = getByTag(buttonHolder, "span");
-		if (span === null) {
-			W("No span found in button holder");
-			continue;
-		}
-
-		let styleDeclaration = window.getComputedStyle(span, "::before");
-		let backgroundColour = styleDeclaration.getPropertyValue("background-color");
-		let checked = backgroundColour === "rgb(144, 144, 144)";
-
 		let button = getByTag(buttonHolder, "input");
 		if (button === null) {
 			W("No button found in button holder");
 			continue;
 		}
 
-		if (checked) entryData = new ChoicesEntryData(text);
+		let checked = button.checked;
+
+		if (checked) entryData = entryData ?? new ChoicesEntryData(text);
 		entriesElements.push(
 			new ChoicesEntryElements(button)
 		);
