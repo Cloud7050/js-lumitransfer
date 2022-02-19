@@ -1,3 +1,9 @@
+const QuestionType = {
+	blanks: "fib",
+	responses: "mrq",
+	choices: "tof"
+}
+
 class QuestionData {
 	constructor(
 		mainText,
@@ -43,7 +49,10 @@ class BlanksInputData extends InputData {
 		referenceText
 	) {
 		// Angular fill-in-blanks
-		super("fib", entriesData);
+		super(
+			QuestionType.blanks,
+			entriesData
+		);
 
 		Object.assign(
 			this,
@@ -55,14 +64,20 @@ class BlanksInputData extends InputData {
 class ResponsesInputData extends InputData {
 	constructor(entriesData) {
 		// Angular multiple response question
-		super("mrq", entriesData);
+		super(
+			QuestionType.responses,
+			entriesData
+		);
 	}
 }
 
 class ChoicesInputData extends InputData {
 	constructor(entriesData) {
 		// Angular true or false
-		super("tof", entriesData);
+		super(
+			QuestionType.choices,
+			entriesData
+		);
 	}
 }
 
@@ -93,13 +108,13 @@ class BlanksEntryData {
 class MultiEntryData {
 	constructor(
 		text,
-		checked
+		check
 	) {
 		Object.assign(
 			this,
 			{
 				text,
-				checked
+				check
 			}
 		);
 	}
@@ -429,7 +444,6 @@ function tryExtractChoices(questionHolder) {
 		return null;
 	}
 
-	let hasChecked = false;
 	let entriesData = [];
 	let entriesElements = [];
 	for (let option of options) {
@@ -459,15 +473,6 @@ function tryExtractChoices(questionHolder) {
 
 		let checked = button.checked;
 
-		if (checked) {
-			if (hasChecked) {
-				W("Multiple checked buttons found in question holder");
-				return null;
-			}
-
-			hasChecked = true;
-		}
-
 		entriesData.push(
 			new ResponsesEntryData(
 				text,
@@ -481,10 +486,6 @@ function tryExtractChoices(questionHolder) {
 
 	if (entriesElements.length === 0) {
 		W("No extractable entries found in question holder");
-		return null;
-	}
-	if (!hasChecked) {
-		W("No checked button found in question holder");
 		return null;
 	}
 
@@ -535,15 +536,22 @@ function importOne(storedQuestionData, destinationData, destinationElements) {
 		if (storedInputData.type !== destinationInputData.type) continue;
 
 		switch (storedInputData.type) {
-			case "fib":
+			case QuestionType.blanks:
 				success = tryImportBlanks(
 					storedInputData,
 					destinationInputData,
 					destinationInputElements
 				);
 				break;
-			case "mrq":
+			case QuestionType.responses:
 				success = tryImportResponses(
+					storedInputData,
+					destinationInputData,
+					destinationInputElements
+				);
+				break;
+			case QuestionType.choices:
+				success = tryImportChoices(
 					storedInputData,
 					destinationInputData,
 					destinationInputElements
@@ -619,8 +627,50 @@ function tryImportResponses(
 		let storedEntryData = storedEntriesData[i];
 		let checkbox = orderedCheckboxes[i];
 
-		checkbox.checked = storedEntryData.checked;
+		checkbox.checked = storedEntryData.check;
 	}
+
+	return true;
+}
+function tryImportChoices(
+	storedInputData,
+	destinationInputData,
+	destinationInputElements
+) {
+	let storedEntriesData = storedInputData.entriesData;
+	let destinationEntriesData = destinationInputData.entriesData;
+	let destinationEntriesElements = destinationInputElements.entriesElements;
+
+	let buttonToCheck = null;
+
+	outerLoop:
+	for (let storedEntryData of storedEntriesData) {
+		let storeMatchingButton = storedEntryData.check;
+
+		for (let i = 0; i < destinationEntriesData.length; i++) {
+			let destinationEntryData = destinationEntriesData[i];
+			let destinationEntryElement = destinationEntriesElements[i];
+
+			if (
+				storedEntryData.text === destinationEntryData.text
+			) {
+				if (storeMatchingButton) {
+					buttonToCheck = buttonToCheck ?? destinationEntryElement.control;
+				}
+
+				continue outerLoop;
+			}
+		}
+
+		return false;
+	}
+
+	if (buttonToCheck === null) {
+		W("No button to check in stored input data");
+		return true;
+	}
+
+	buttonToCheck.checked = true;
 
 	return true;
 }
