@@ -187,24 +187,37 @@ class InputPair {
 	}
 }
 
-function L(content, addText = true) {
-	if (addText) content = `>>> ${content}`;
-	console.log(content);
+function L(content) {
+	console.log(
+		// Skip instanceof check for type object + class String from new String()s
+		(typeof content !== "string")
+			? content
+			: `>>> ${content}`
+	);
 }
 
-function W(content, addText = true) {
-	if (addText) content = `[!] ${content}!`;
-	console.warn(content);
+function W(content) {
+	console.warn(
+		(typeof content !== "string")
+			? content
+			: `[!] ${content}!`
+	);
 }
 
-function E(content, addText = true) {
-	if (addText) content = `ERR ${content}!`;
-	console.error(content);
+function E(content) {
+	console.error(
+		(typeof content !== "string")
+			? content
+			: `ERR ${content}!`
+	);
 }
 
-function D(content, addText = true) {
-	if (addText) content = `*** ${content}`;
-	console.debug(content);
+function D(content) {
+	console.debug(
+		(typeof content !== "string")
+			? content
+			: `*** ${content}`
+	);
 }
 
 function getByTag(parent, tag, returnFirstElement = true) {
@@ -283,7 +296,7 @@ function extract(questionHolders) {
 			mainText,
 			inputPair.inputData
 		);
-		D(questionData, false);
+		D(questionData);
 
 		data.push(questionData);
 		elements.push(
@@ -306,7 +319,7 @@ function extract(questionHolders) {
 		data,
 		elements
 	);
-	D(questionsPair, false);
+	D(questionsPair);
 	return questionsPair;
 }
 function extractMainText(header) {
@@ -516,7 +529,7 @@ function importUsing(storedData, questionsPair) {
 			if (success) questionsImported++;
 		} catch (error) {
 			E("Stored question data is in wrong format");
-			E(error, false);
+			E(error);
 		}
 	}
 
@@ -696,11 +709,11 @@ function retrieveData() {
 		data = JSON.parse(rawData);
 	} catch (syntaxError) {
 		E("Stored data unreadable");
-		E(syntaxError, false);
+		E(syntaxError);
 		return null;
 	}
 
-	D(data, false);
+	D(data);
 	return data;
 }
 
