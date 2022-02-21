@@ -139,34 +139,58 @@ module.exports = {
 			}
 		],
 
-		//TODO
-		// [Best Practices]
+		// [Suggestions]
 		"accessor-pairs": 1,
+		"arrow-body-style": 1,
 		"block-scoped-var": 1,
+		"camelcase": 1,
+		// "capitalized-comments": 0, // Allow commented code
 		"class-methods-use-this": 1,
 		"complexity": 1,
 		"consistent-return": 1,
+		"consistent-this": 1,
 		"curly": [
 			1,
 			"multi-or-nest",
 		],
 		// "default-case": 0,
-		// "default-case-last": 0,
+		"default-case-last": 1,
 		"default-param-last": 1,
-		"dot-location": [
-			1,
-			"property",
-		],
 		"dot-notation": 1,
 		"eqeqeq": 1,
+		"func-name-matching": [
+			1,
+			"always", // Same
+			{
+				"considerPropertyDescriptor": true // Was false
+				// "includeCommonJSModuleExports": false
+			}
+		],
+		// "func-names": 0,
+		"func-style": [
+			1,
+			"declaration"
+		],
 		"grouped-accessor-pairs": [
 			1,
-			"getBeforeSet",
+			"getBeforeSet"
 		],
-		// "guard-for-in": 0,
-		"import/first": 0,
-		// "import/order": 0,
+		"guard-for-in": 1,
+		// "id-denylist": 0,
+		// "id-length": 0,
+		// "id-match": 0,
+		// "init-declarations": 0,
 		// "max-classes-per-file": 0,
+		// "max-depth": 0,
+		// "max-lines": 0,
+		// "max-lines-per-function": 0,
+		// "max-nested-callbacks": 0,
+		// "max-params": 0,
+		// "max-statements": 0,
+		// "multiline-comment-style": 0,
+		"new-cap": 1,
+
+		//TODO
 		"no-alert": 1,
 		"no-caller": 1,
 		// "no-case-declarations": 2,
@@ -236,7 +260,6 @@ module.exports = {
 		// "strict": 0, // Forced off by parserOptions "sourceType": "module" OR ecmaFeatures "impliedStrict": true
 
 		// [Variables]
-		// "init-declarations": 0,
 		"no-delete-var": 1, // Was 2
 		"no-label-var": 1,
 		// "no-restricted-globals": 0,
@@ -264,8 +287,6 @@ module.exports = {
 		],
 		"block-spacing": 1,
 		"brace-style": 1,
-		"camelcase": 1,
-		// "capitalized-comments": 0,
 		"comma-dangle": [
 			1,
 			{
@@ -279,15 +300,11 @@ module.exports = {
 		"comma-spacing": 1,
 		"comma-style": 1,
 		"computed-property-spacing": 1,
-		"consistent-this": 1,
 		"eol-last": [
 			1,
 			"always",
 		],
 		"func-call-spacing": 1,
-		// "func-name-matching": 0,
-		// "func-names": 0,
-		// "func-style": 0,
 		"function-call-argument-newline": [
 			1,
 			"consistent",
@@ -296,9 +313,6 @@ module.exports = {
 			1,
 			"consistent",
 		],
-		// "id-blacklist": 0,
-		// "id-length": 0,
-		// "id-match": 0,
 		"implicit-arrow-linebreak": 1,
 		"indent": [
 			1,
@@ -338,20 +352,12 @@ module.exports = {
 		],
 		// "lines-around-comment": 0,
 		// "lines-between-class-members": 0,
-		// "max-depth": 0,
 		// "max-len": 0,
-		// "max-lines": 0,
-		// "max-lines-per-function": 0,
-		// "max-nested-callbacks": 0,
-		// "max-params": 0,
-		// "max-statements": 0,
 		"max-statements-per-line": 1,
-		// "multiline-comment-style": 0,
 		"multiline-ternary": [
 			1,
 			"always-multiline",
 		],
-		// "new-cap": 0,
 		"new-parens": 1,
 		"newline-per-chained-call": 1,
 		"no-array-constructor": 1,
@@ -467,11 +473,6 @@ module.exports = {
 		// "wrap-regex": 0,
 
 		// [ECMAScript 6]
-		"arrow-body-style": [
-			1,
-			"as-needed",
-			{ "requireReturnForObjectLiteral": true },
-		],
 		"arrow-parens": 1,
 		"arrow-spacing": 1,
 		"generator-star-spacing": [
@@ -525,5 +526,11 @@ module.exports = {
 		],
 		"no-extra-semi": 1, // Was 2
 		"no-regex-spaces": 1, // Was 2
+
+		// [Temp - Remaining Best Practices]
+		"dot-location": [
+			1,
+			"property",
+		],
 	},
 };
