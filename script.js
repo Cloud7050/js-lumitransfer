@@ -157,7 +157,7 @@ class Mode {
 	}
 }
 
-class QuestionPairs {
+class QuestionsPair {
 	constructor(
 		data,
 		elements
@@ -302,12 +302,12 @@ function extract(questionHolders) {
 
 	L(`Extracted ${questionsExtracted}/${questionCounter} question(s)`);
 
-	let questionPairs = new QuestionPairs(
+	let questionsPair = new QuestionsPair(
 		data,
 		elements
 	);
-	D(questionPairs, false);
-	return questionPairs;
+	D(questionsPair, false);
+	return questionsPair;
 }
 function extractMainText(header) {
 	let mainText = Array.from(header.children).reduce(
@@ -499,12 +499,10 @@ function tryExtractChoices(questionHolder) {
 	);
 }
 
-function importUsing(storedData, questionPairs) {
+function importUsing(storedData, questionsPair) {
 	// Clone for importOne() to splice later as questions get overwritten
-	questionPairs = new QuestionPairs(
-		[...questionPairs.data],
-		[...questionPairs.elements]
-	);
+	let destinationData = [...questionsPair.data];
+	let destinationElements = [...questionsPair.elements];
 
 	let questionsImported = 0;
 	let questionCounter = 0;
@@ -514,7 +512,7 @@ function importUsing(storedData, questionPairs) {
 		L(`Importing stored question #${questionCounter}...`);
 
 		try {
-			let success = importOne(storedQuestionData, questionPairs.data, questionPairs.elements);
+			let success = importOne(storedQuestionData, destinationData, destinationElements);
 			if (success) questionsImported++;
 		} catch (error) {
 			E("Stored question data is in wrong format");
@@ -710,17 +708,17 @@ function retrieveData() {
 	let mode = detectMode();
 	if (mode === null) return;
 
-	let questionPairs = extract(mode.questionHolders);
-	if (questionPairs === null) return;
+	let questionsPair = extract(mode.questionHolders);
+	if (questionsPair === null) return;
 
 	if (mode.extractorMode) {
-		storeData(questionPairs.data);
+		storeData(questionsPair.data);
 		L("✅ Data extracted & stored. Run this script again on the ongoing quiz to import into");
 	} else {
 		let storedData = retrieveData();
 		if (storedData === null) return;
 
-		importUsing(storedData, questionPairs);
+		importUsing(storedData, questionsPair);
 		L("✅ Data retrieved & imported. Matching questions overwritten");
 	}
 })();
