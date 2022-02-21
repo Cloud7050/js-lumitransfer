@@ -491,7 +491,7 @@ function tryExtractChoices(questionHolder) {
 		let checked = button.checked;
 
 		entriesData.push(
-			new ResponsesEntryData(
+			new ChoicesEntryData(
 				text,
 				checked
 			)
