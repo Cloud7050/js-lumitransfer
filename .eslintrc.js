@@ -3,15 +3,9 @@ module.exports = {
 
 	"env": {
 		"browser": true,
-		"node": true,
 		//NOTE Set to es2022 once VSCode eslint extension updates
 		// https://github.com/eslint/eslint/pull/15587
 		"es2021": true
-	},
-
-	"parserOptions": {
-		"sourceType": "module",
-		"ecmaFeatures": { "impliedStrict": true }
 	},
 
 	"rules": {
@@ -261,7 +255,7 @@ module.exports = {
 		// "no-ternary": 0,
 		"no-throw-literal": 1,
 		"no-undef-init": 1,
-		"no-undefined": 2,
+		// "no-undefined": 0,
 		// "no-underscore-dangle": 0,
 		"no-unneeded-ternary": [
 			1,
@@ -298,26 +292,57 @@ module.exports = {
 			}
 		],
 		// "no-with": 2,
-
-		//TODO
+		"object-shorthand": [
+			1,
+			"always", // Same
+			{
+				// "avoidQuotes": false,
+				// "ignoreConstructors": false,
+				"avoidExplicitReturnArrows": true
+			}
+		],
+		"one-var": [
+			1,
+			"never", // Was "always"
+		],
+		"one-var-declaration-per-line": 1,
+		"operator-assignment": 1,
+		"prefer-arrow-callback": 1,
+		// "prefer-const": 0,
+		// "prefer-destructuring": 0,
+		"prefer-exponentiation-operator": 1,
 		"prefer-named-capture-group": 1,
+		"prefer-numeric-literals": 1,
+		"prefer-object-has-own": 1,
+		"prefer-object-spread": 1,
 		"prefer-promise-reject-errors": 1,
-		"prefer-regex-literals": 1,
-		// "radix": 0,
+		"prefer-regex-literals": [
+			1,
+			{ "disallowRedundantWrapping": true }
+		],
+		"prefer-rest-params": 1,
+		"prefer-spread": 1,
+		"prefer-template": 1,
+		"quote-props": 1,
+		"radix": [
+			1,
+			"as-needed" // Was "always"
+		],
 		"require-await": 1,
 		"require-unicode-regexp": 1,
+		"require-yield": 1, // Was 2
+		"sort-imports": 1,
+		// "sort-keys": 0,
+		// "sort-vars": 0,
+		"spaced-comment": 1,
+		// "strict": 0, // Don't force, though rule configs assume strict errors
+		// "symbol-description": 0,
 		// "vars-on-top": 0,
-		"wrap-iife": [
-			1,
-			"inside",
-			{ "functionPrototypeMethods": true },
-		],
 		"yoda": 1,
 
-		// [Strict]
-		// "strict": 0, // Forced off by parserOptions "sourceType": "module" OR ecmaFeatures "impliedStrict": true
+		// [Layout & Formatting]
 
-		// [Stylistic Issues]
+		//TODO
 		"array-bracket-newline": [
 			1,
 			"consistent",
@@ -448,12 +473,6 @@ module.exports = {
 			"always",
 		],
 		"object-property-newline": 1,
-		"one-var": [
-			1,
-			"never",
-		],
-		"one-var-declaration-per-line": 1,
-		"operator-assignment": 1,
 		"operator-linebreak": [
 			1,
 			"before",
@@ -463,9 +482,6 @@ module.exports = {
 			"never",
 		],
 		// "padding-line-between-statements": 0,
-		"prefer-exponentiation-operator": 1,
-		"prefer-object-spread": 1,
-		"quote-props": 1,
 		"quotes": [
 			1,
 			"double",
@@ -473,8 +489,6 @@ module.exports = {
 		"semi": 1,
 		"semi-spacing": 1,
 		"semi-style": 1,
-		// "sort-keys": 0,
-		// "sort-vars": 0,
 		"space-before-blocks": 1,
 		"space-before-function-paren": [
 			1,
@@ -490,7 +504,6 @@ module.exports = {
 		],
 		"space-infix-ops": 1,
 		"space-unary-ops": 1,
-		// "spaced-comment": 0,
 		"switch-colon-spacing": 1,
 		"template-tag-spacing": 1,
 		"unicode-bom": 1,
@@ -503,18 +516,7 @@ module.exports = {
 			1,
 			"after",
 		],
-		"object-shorthand": 1,
-		"prefer-arrow-callback": 1,
-		// "prefer-const": 0, // If using, should {"ignoreReadBeforeAssign": true}
-		// "prefer-destructuring": 0,
-		"prefer-numeric-literals": 1,
-		"prefer-rest-params": 1,
-		"prefer-spread": 1,
-		"prefer-template": 1,
-		"require-yield": 1, // Was 2
 		"rest-spread-spacing": 1,
-		// "sort-imports": 0,
-		"symbol-description": 1,
 		"template-curly-spacing": 1,
 		"yield-star-spacing": 1,
 
@@ -538,5 +540,10 @@ module.exports = {
 			"property",
 		],
 		"no-multi-spaces": 1,
+		"wrap-iife": [
+			1,
+			"inside",
+			{ "functionPrototypeMethods": true },
+		],
 	},
 };
