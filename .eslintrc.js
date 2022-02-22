@@ -1,7 +1,5 @@
 module.exports = {
-	"extends": [
-		"eslint:recommended"
-	],
+	"extends": [ "eslint:recommended" ],
 
 	"env": {
 		"browser": true,
@@ -13,9 +11,7 @@ module.exports = {
 
 	"parserOptions": {
 		"sourceType": "module",
-		"ecmaFeatures": {
-			"impliedStrict": true
-		}
+		"ecmaFeatures": { "impliedStrict": true }
 	},
 
 	"rules": {
@@ -24,7 +20,7 @@ module.exports = {
 			1,
 			{
 				// "allowImplicit": false,
-				"checkForEach": true // Was false
+				"checkForEach": true
 			}
 		],
 		// "constructor-super": 2,
@@ -41,9 +37,7 @@ module.exports = {
 		// "no-const-assign": 2,
 		"no-constant-condition": [
 			1, // Was 2
-			{
-				"checkLoops": false // Was true
-			}
+			{ "checkLoops": false }
 		],
 		"no-constructor-return": 1,
 		"no-control-regex": 1, // Was 2
@@ -68,7 +62,7 @@ module.exports = {
 				// "skipStrings": true,
 				// "skipComments": false,
 				// "skipRegExps": false,
-				"skipTemplates": true // Was false
+				"skipTemplates": true
 			}
 		],
 		"no-loss-of-precision": 1, // Was 2
@@ -85,9 +79,7 @@ module.exports = {
 		// "no-this-before-super": 2,
 		"no-undef": [
 			2,
-			{
-				"typeof": true // Was false
-			},
+			{ "typeof": true },
 		],
 		"no-unexpected-multiline": 1, // Was 2
 		"no-unmodified-loop-condition": 1,
@@ -96,15 +88,11 @@ module.exports = {
 		"no-unsafe-finally": 1, // Was 2
 		"no-unsafe-negation": [
 			1, // Was 2
-			{
-				"enforceForOrderingRelations": true // Was false
-			}
+			{ "enforceForOrderingRelations": true }
 		],
 		"no-unsafe-optional-chaining": [
 			2,
-			{
-				"disallowArithmeticOperators": true // Was false
-			}
+			{ "disallowArithmeticOperators": true }
 		],
 		"no-unused-private-class-members": 1,
 		"no-unused-vars": [
@@ -121,7 +109,7 @@ module.exports = {
 		"no-use-before-define": [
 			1,
 			{
-				"functions": false, // Was true
+				"functions": false,
 				// "classes": true,
 				// "variables": true
 			},
@@ -132,14 +120,12 @@ module.exports = {
 			1, // Was 2
 			{
 				// "enforceForSwitchCase": true,
-				"enforceForIndexOf": true // Was false
+				"enforceForIndexOf": true
 			}
 		],
 		"valid-typeof": [
 			1, // Was 2
-			{
-				"requireStringLiterals": true // Was false
-			}
+			{ "requireStringLiterals": true }
 		],
 
 		// [Suggestions]
@@ -165,7 +151,7 @@ module.exports = {
 			1,
 			"always", // Same
 			{
-				"considerPropertyDescriptor": true // Was false
+				"considerPropertyDescriptor": true
 				// "includeCommonJSModuleExports": false
 			}
 		],
@@ -194,7 +180,7 @@ module.exports = {
 		"new-cap": 1,
 		// "no-alert": 0,
 		"no-array-constructor": 1,
-		// "no-bitwise": 0,
+		"no-bitwise": 1,
 		"no-caller": 2,
 		"no-case-declarations": 1, // Was 2
 		"no-confusing-arrow": 1,
@@ -204,15 +190,11 @@ module.exports = {
 		// "no-div-regex": 0,
 		"no-else-return": [
 			1,
-			{
-				"allowElseIf": false // Was true
-			}
+			{ "allowElseIf": false }
 		],
 		"no-empty": [
 			1, // Was 2
-			{
-				"allowEmptyCatch": true // Was false
-			}
+			{ "allowEmptyCatch": true }
 		],
 		"no-empty-function": 1,
 		"no-eq-null": 1,
@@ -221,20 +203,16 @@ module.exports = {
 		"no-extra-bind": 1,
 		"no-extra-boolean-cast": [
 			1, // Was 2
-			{
-				"enforceForLogicalOperands": true // Was false
-			},
+			{ "enforceForLogicalOperands": true }
 		],
 		"no-extra-label": 1,
 		"no-extra-semi": 1, // Was 2
 		"no-floating-decimal": 1,
-		"no-global-assign": 1, // Was 2
+		// "no-global-assign": 2,
 		"no-implicit-coercion": 1,
 		"no-implicit-globals": [
 			1,
-			{
-				"lexicalBindings": true // Was false
-			},
+			{ "lexicalBindings": true }
 		],
 		"no-implied-eval": 1,
 		// "no-inline-comments": 0,
@@ -261,25 +239,67 @@ module.exports = {
 		"no-param-reassign": 1,
 		// "no-plusplus": 0,
 		"no-proto": 1,
-
-		//TODO
 		"no-redeclare": 1, // Was 2
+		"no-regex-spaces": 1, // Was 2
+		// "no-restricted-exports": 0,
+		// "no-restricted-globals": 0,
+		// "no-restricted-imports": 0,
 		// "no-restricted-properties": 0,
+		// "no-restricted-syntax": 0,
 		"no-return-assign": 1,
 		"no-return-await": 1,
 		"no-script-url": 1,
 		"no-sequences": 1,
+		"no-shadow": [
+			1,
+			{
+				"builtinGlobals": true
+				// "hoist": "functions"
+			}
+		],
+		// "no-shadow-restricted-names": 2,
+		// "no-ternary": 0,
 		"no-throw-literal": 1,
+		"no-undef-init": 1,
+		"no-undefined": 2,
+		// "no-underscore-dangle": 0,
+		"no-unneeded-ternary": [
+			1,
+			{
+				"defaultAssignment": false // Use || or ?? instead
+			}
+		],
 		"no-unused-expressions": 1,
 		"no-unused-labels": 1, // Was 2
 		"no-useless-call": 1,
 		"no-useless-catch": 1, // Was 2
+		"no-useless-computed-key": [
+			1,
+			{ "enforceForClassMembers": true },
+		],
 		"no-useless-concat": 1,
+		"no-useless-constructor": 1,
 		"no-useless-escape": 1, // Was 2
+		"no-useless-rename": 1,
 		"no-useless-return": 1,
+		"no-var": 1,
 		"no-void": 1,
-		// "no-warning-comments": 0,
-		"no-with": 1, // Was 2
+		"no-warning-comments": [
+			1,
+			{
+				"terms": [
+					"TODO",
+					"TODOS",
+					"TODO WIP",
+					"FIXME",
+					"WIP"
+				]
+				// "location": "start"
+			}
+		],
+		// "no-with": 2,
+
+		//TODO
 		"prefer-named-capture-group": 1,
 		"prefer-promise-reject-errors": 1,
 		"prefer-regex-literals": 1,
@@ -296,20 +316,6 @@ module.exports = {
 
 		// [Strict]
 		// "strict": 0, // Forced off by parserOptions "sourceType": "module" OR ecmaFeatures "impliedStrict": true
-
-		// [Variables]
-		// "no-restricted-globals": 0,
-		"no-shadow": [
-			1,
-			{
-				"builtinGlobals": true,
-				"hoist": "all",
-				// "allow": [],
-			},
-		],
-		"no-shadow-restricted-names": 1, // Was 2
-		"no-undef-init": 1,
-		// "no-undefined": 0,
 
 		// [Stylistic Issues]
 		"array-bracket-newline": [
@@ -408,15 +414,8 @@ module.exports = {
 				// "maxBOF": null,
 			},
 		],
-		// "no-restricted-syntax": 0,
 		// "no-tabs": 0,
-		// "no-ternary": 0,
 		"no-trailing-spaces": 1,
-		"no-underscore-dangle": 1,
-		"no-unneeded-ternary": [
-			1,
-			{ "defaultAssignment": false }, // Want to use ?? or || instead
-		],
 		"no-whitespace-before-property": 1,
 		"nonblock-statement-body-position": 1,
 		"object-curly-newline": [
@@ -504,15 +503,6 @@ module.exports = {
 			1,
 			"after",
 		],
-		// "no-restricted-exports": 0,
-		// "no-restricted-imports": 0,
-		"no-useless-computed-key": [
-			1,
-			{ "enforceForClassMembers": true },
-		],
-		"no-useless-constructor": 1,
-		"no-useless-rename": 1,
-		"no-var": 1,
 		"object-shorthand": 1,
 		"prefer-arrow-callback": 1,
 		// "prefer-const": 0, // If using, should {"ignoreReadBeforeAssign": true}
@@ -541,7 +531,6 @@ module.exports = {
 				"enforceForNewInMemberExpressions": false, // Allows (new Bar()).baz
 			},
 		],
-		"no-regex-spaces": 1, // Was 2
 
 		// [Temp - Remaining Best Practices]
 		"dot-location": [
