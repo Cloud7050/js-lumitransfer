@@ -454,20 +454,7 @@ module.exports = {
 				ignoreChainWithDepth: 1 // Was 2
 			}
 		],
-		"no-extra-parens": [
-			1,
-			"all", // Same
-			{
-				// conditionalAssign: true,
-				// "returnAssign": true,
-				nestedBinaryExpressions: false, // Allows a || (b && c); a + (b * c)
-				ignoreJSX: "all", // Was "none"
-				enforceForArrowConditionals: false, // Allows a => (b ? c : d)
-				// "enforceForSequenceExpressions": true,
-				enforceForNewInMemberExpressions: false, // Allows (new Cloud()).altitude
-				enforceForFunctionPrototypeMethods: false // Allows (function() {}).call()
-			}
-		],
+		// "no-extra-parens": 0, // Limitation: No exception for ternary conditions
 		"no-mixed-spaces-and-tabs": 1, // Was 2
 		"no-multi-spaces": 1,
 		"no-multiple-empty-lines": [
