@@ -152,7 +152,7 @@ module.exports = {
 		"consistent-this": 1,
 		"curly": [
 			1,
-			"multi-or-nest" // Was "all"
+			"multi-line" // Was "all"
 		],
 		// "default-case": 0,
 		"default-case-last": 1,
