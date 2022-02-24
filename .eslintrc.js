@@ -365,14 +365,14 @@ module.exports = {
 		"yoda": 1,
 
 		// [Layout & Formatting]
-		// Multiline checks in & between elements
-		"array-bracket-newline": 1,
+		"array-bracket-newline": [
+			1,
+			"consistent" // Was "multiline". Limitation: No consistent + multiline
+		],
 		"array-bracket-spacing": 1,
 		"array-element-newline": [
 			1,
-			// Multiline only checks inside elements,
-			// could force long line of short elements
-			"consistent" // Was "always"
+			"consistent" // Was "always". Limitation: No consistent + multiline
 		],
 		"arrow-parens": 1,
 		"arrow-spacing": 1,
@@ -390,21 +390,22 @@ module.exports = {
 		"func-call-spacing": 1,
 		"function-call-argument-newline": [
 			1,
-			"consistent" // Was "always". No multiline
+			"consistent" // Was "always". Limitation: No consistent + multiline
 		],
-		// Multiline only checks between elements,
-		// allows first/last argument over many lines to not have newline before/after
-		"function-paren-newline": 1,
+		"function-paren-newline": [
+			1,
+			"consistent" // Was "multiline". Limitation: No consistent + multiline
+		],
 		"generator-star-spacing": [
 			1,
-			"after"
+			"after" // Was "before"
 		],
 		"implicit-arrow-linebreak": 1,
 		"indent": [
 			1,
-			"tab",
+			"tab", // Was 4
 			{
-				SwitchCase: 1
+				SwitchCase: 1 // Was 0
 				// VariableDeclarator: 1,
 				// outerIIFEBody: 1,
 				// MemberExpression: 1,
@@ -436,7 +437,7 @@ module.exports = {
 		// "line-comment-position": 0,
 		"linebreak-style": [
 			1,
-			"windows"
+			"windows" // Was "unix"
 		],
 		// "lines-around-comment": 0,
 		// "lines-between-class-members": 0,
@@ -444,7 +445,7 @@ module.exports = {
 		"max-statements-per-line": 1,
 		"multiline-ternary": [
 			1,
-			"always-multiline"
+			"always-multiline" // Was "always"
 		],
 		"new-parens": 1,
 		"newline-per-chained-call": [
@@ -455,7 +456,7 @@ module.exports = {
 		],
 		"no-extra-parens": [
 			1,
-			"all",
+			"all", // Same
 			{
 				// conditionalAssign: true,
 				// "returnAssign": true,
@@ -468,63 +469,42 @@ module.exports = {
 			}
 		],
 		"no-mixed-spaces-and-tabs": 1, // Was 2
-
-		//TODO
+		"no-multi-spaces": 1,
 		"no-multiple-empty-lines": [
 			1,
 			{
-				max: 3
-				// "maxEOF": null,
-				// "maxBOF": null,
+				max: 3, // Was 2
+				maxEOF: 0,
+				maxBOF: 0
 			}
 		],
-		// "no-tabs": 0,
+		// "no-tabs": 0, // Limitation: allowIndentationTabs doesn't allow partial tabs from commenting a block with deeper indentation
 		"no-trailing-spaces": 1,
 		"no-whitespace-before-property": 1,
 		"nonblock-statement-body-position": 1,
 		"object-curly-newline": [
 			1,
 			{
-				ObjectExpression: {
-					multiline: true,
-					minProperties: 2,
-					consistent: true
-				},
-				ObjectPattern: {
-					multiline: true,
-					// "minProperties": null,
-					consistent: true
-				},
-				ImportDeclaration: {
-					multiline: true,
-					// "minProperties": null,
-					consistent: true
-				},
-				ExportDeclaration: {
-					multiline: true,
-					// "minProperties": null,
-					consistent: true
-				}
+				multiline: true,
+				consistent: true // Same. Only default if no object option
 			}
 		],
 		"object-curly-spacing": [
 			1,
-			"always"
+			"always" // Was "never"
 		],
 		"object-property-newline": 1,
 		"operator-linebreak": [
 			1,
-			"before"
+			"before" // Was "after"
 		],
 		"padded-blocks": [
 			1,
-			"never"
+			"never" // Was "always"
 		],
 		// "padding-line-between-statements": 0,
-		"quotes": [
-			1,
-			"double"
-		],
+		"quotes": 1,
+		"rest-spread-spacing": 1,
 		"semi": 1,
 		"semi-spacing": 1,
 		"semi-style": 1,
@@ -537,28 +517,19 @@ module.exports = {
 				asyncArrow: "always"
 			}
 		],
-		"space-in-parens": [
-			1,
-			"never"
-		],
+		"space-in-parens": 1,
 		"space-infix-ops": 1,
 		"space-unary-ops": 1,
 		"switch-colon-spacing": 1,
+		"template-curly-spacing": 1,
 		"template-tag-spacing": 1,
 		"unicode-bom": 1,
-		// "wrap-regex": 0,
-
-		// [ECMAScript 6]
-		"rest-spread-spacing": 1,
-		"template-curly-spacing": 1,
-		"yield-star-spacing": 1,
-
-		// [Temp - Remaining Best Practices]
-		"no-multi-spaces": 1,
 		"wrap-iife": [
 			1,
-			"inside",
+			"inside", // Was "outside"
 			{ functionPrototypeMethods: true }
-		]
+		],
+		// "wrap-regex": 0,
+		"yield-star-spacing": 1
 	}
 };
