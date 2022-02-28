@@ -35,4 +35,7 @@ Video showcase: <https://youtu.be/pnGHU86THv4>
 
 Keep an eye out for any yellow warnings (or even red errors) that the script may log while running. You may need to respond appropriately to issues the script encounters (eg checking that an impacted question has the expected answers after importing).
 
+- Answers are imported all at once at such speed that the quiz's autosaving mechanism isn't able to keep up. Only a sporadic few questions will actually get saved automatically, even if the top of the page says "All changes saved as of xx". From there, making further changes to a question by hand (at human speed) does cause that particular question to get autosaved
+	- There should be *no problem when submitting answers* via the "Finish Quiz" button; the issue is with autosaving
+	- The easy to way to ensure that your answers actually get saved (if you wish to *resume at a later time*) is to click the "Save For Later" button at the bottom of the page. This triggers a manual save of the whole quiz, unlike the "Exit" button at the top right
 - If an MRQ/MCQ option has no text whatsoever (eg only an *image* of x̅), due to potentially randomised option order, the option cannot be uniquely identified and so gets skipped with a yellow warning
