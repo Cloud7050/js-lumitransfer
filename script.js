@@ -146,13 +146,15 @@
 	class Mode {
 		constructor(
 			extractorMode,
-			questionHolders
+			questionHolders,
+			saveButton
 		) {
 			Object.assign(
 				this,
 				{
 					extractorMode,
-					questionHolders
+					questionHolders,
+					saveButton
 				}
 			);
 		}
@@ -237,6 +239,7 @@
 
 	function detectMode() {
 		let extractorMode = true;
+		let saveButton = null;
 
 		let quizHolder = getByTag(document, "quiz-question-results");
 		if (quizHolder !== null) {
@@ -252,6 +255,13 @@
 			// Ongoing quiz holder
 			extractorMode = false;
 			l("📥 Using importer mode");
+
+			let buttonsHolder = getByClass(quizHolder, "buttons");
+			if (buttonsHolder === null) w("No buttons holder found in quiz holder");
+			else {
+				saveButton = getByClass(buttonsHolder, "btn-default");
+				if (saveButton === null) w("No save button found in buttons holder");
+			}
 		}
 
 		let questionHolders = getByTag(quizHolder, "quiz-question-view", false);
@@ -262,7 +272,8 @@
 
 		return new Mode(
 			extractorMode,
-			questionHolders
+			questionHolders,
+			saveButton
 		);
 	}
 
@@ -735,6 +746,12 @@
 		return data;
 	}
 
+	function properSave(saveButton) {
+		if (saveButton === null) return;
+
+		saveButton.click();
+	}
+
 
 
 	let mode = detectMode();
@@ -751,6 +768,7 @@
 		if (storedData === null) return;
 
 		importUsing(storedData, questionsPair);
+		properSave(mode.saveButton);
 		l("✅ Data retrieved & imported. Matching questions overwritten");
 	}
 })();
