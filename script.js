@@ -604,7 +604,13 @@
 			let entryData = storedEntriesData[i];
 			let entryElements = destinationEntriesElements[i];
 
-			entryElements.control.value = entryData.value;
+			let control = entryElements.control;
+
+			control.value = entryData.value;
+			triggerUpdate(
+				control,
+				"input"
+			);
 		}
 
 		return true;
@@ -645,6 +651,7 @@
 			let checkbox = orderedCheckboxes[i];
 
 			checkbox.checked = storedEntryData.checked;
+			triggerUpdate(checkbox);
 		}
 
 		return true;
@@ -688,8 +695,20 @@
 		}
 
 		buttonToCheck.checked = true;
+		triggerUpdate(buttonToCheck);
 
 		return true;
+	}
+	function triggerUpdate(
+		element,
+		type = "change"
+	) {
+		element.dispatchEvent(
+			new Event(
+				type,
+				{ bubbles: true }
+			)
+		);
 	}
 
 	function storeData(data) {
@@ -718,6 +737,8 @@
 		d(data);
 		return data;
 	}
+
+
 
 	let mode = detectMode();
 	if (mode === null) return;
