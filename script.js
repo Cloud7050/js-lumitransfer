@@ -704,10 +704,7 @@
 		type = "change"
 	) {
 		element.dispatchEvent(
-			new Event(
-				type,
-				{ bubbles: true }
-			)
+			new Event(type)
 		);
 	}
 
