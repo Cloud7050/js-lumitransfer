@@ -6,7 +6,7 @@ Helpful for:
 
 - Quizzes that need individual pasting (eg many fill-in-blanks questions)
 - Quizzes that need many attempts (eg not showing marks per question)
-- Quizzes that randomly order their questions & answers
+- Quizzes with randomised question & option order
 - Quizzes that are simply long
 
 Supported question types:
@@ -36,3 +36,8 @@ Video showcase: <https://youtu.be/pnGHU86THv4>
 Keep an eye out for any yellow warnings (or even red errors) that the script may log while running. You may need to respond appropriately to issues the script encounters (eg checking that an impacted question has the expected answers after importing).
 
 - If an MRQ/MCQ option has no text whatsoever (eg only an *image* of x̅), due to potentially randomised option order, the option cannot be uniquely identified and so gets skipped with a yellow warning
+
+## Potentially Planned Features
+
+- Using each question's marks from the results page (if any) to note down the ones whose answers need manual changes, then highlighting / adding text to those questions while importing
+- Using a more in-depth process to extract text, to utilise image sources for uniquely identifying questions & options
