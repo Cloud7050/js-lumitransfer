@@ -21,7 +21,7 @@ Supported question types:
 
 You do not need to download/install anything or know how to code to use these scripts.
 
-1. **Copy script**: Open the script's contents and copy them in their *entirety* (try <kbd>Ctrl</kbd>-<kbd>A</kbd> + <kbd>Ctrl</kbd>-<kbd>C</kbd>). [Here's a convenient link to it](https://raw.githubusercontent.com/Cloud7050/js-lumitransfer/master/script.js).
+1. **Copy script**: Open the script's contents and copy them in their *entirety* (try <kbd>Ctrl</kbd>-<kbd>A</kbd> + <kbd>Ctrl</kbd>-<kbd>C</kbd>). [Here's a convenient link to it](https://raw.githubusercontent.com/Cloud7050/js-lumitransfer/master/script.js)
 2. **Go to quiz results**: Go to the page with your quiz *results* that you want to extract (*not* an ongoing attempt)
 3. **Run script to extract**: Open your browser's DevTools (try F12 for Google Chrome). Go to its *console* tab and paste the script in. Press enter. You should see some logs, then a success message at the end
 4. **Go to ongoing quiz**: Go to the page with your *ongoing* quiz attempt that you want to import your answers into
