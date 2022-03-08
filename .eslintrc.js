@@ -146,7 +146,7 @@ module.exports = {
 		"block-scoped-var": 1,
 		"camelcase": 1,
 		// "capitalized-comments": 0, // Allow commented code
-		"class-methods-use-this": 1,
+		// "class-methods-use-this": 0,
 		"complexity": 1,
 		"consistent-return": 1,
 		"consistent-this": 1,
