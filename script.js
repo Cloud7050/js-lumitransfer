@@ -558,6 +558,27 @@
 		);
 	}
 
+	function onRetrieve() {
+		let rawData = localStorage.getItem("LumiTransfer");
+		if (rawData === null) {
+			e("⛔ Did not find any stored answers to import. Run this script on your quiz results (not an ongoing attempt) to extract those answers first");
+			return null;
+		}
+
+		let data;
+		try {
+			data = JSON.parse(rawData);
+		} catch (syntaxError) {
+			e("Stored data unreadable");
+			e(syntaxError);
+			return null;
+		}
+
+		l("💡 Stored data retrieved");
+		d(data);
+		return data;
+	}
+
 
 
 	let scan = onScan();
@@ -568,8 +589,9 @@
 
 	if (scan.extractorMode) {
 		onStore(questions);
-		l("✅ Data extracted & stored. Run this script again on your ongoing quiz to import your answers");
+		l("✅ Your answers have been extracted & stored. Run this script again on an ongoing quiz attempt to import them");
 	} else {
-
+		let data = onRetrieve();
+		if (data === null) return;
 	}
 })();
