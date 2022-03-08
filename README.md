@@ -29,15 +29,12 @@ You do not need to download/install anything or know how to code to use these sc
 
 If you keep the script copied to your clipboard, it should be pretty easy to rapidly extract & import your quiz answers back-to-back as you make multiple similar attempts.
 
-Video showcase: <https://youtu.be/pnGHU86THv4>
+Video showcase (slightly old): <https://youtu.be/pnGHU86THv4>
 
-## Limitations
+## Note
 
-Keep an eye out for any yellow warnings (or even red errors) that the script may log while running. You may need to respond appropriately to issues the script encounters (eg checking that an impacted question has the expected answers after importing).
-
-- If an MRQ/MCQ option has no text whatsoever (eg only an *image* of x̅), due to potentially randomised option order, the option cannot be uniquely identified and so gets skipped with a yellow warning
+Keep an eye out for any yellow warnings (or even red errors) that the script may log while running. You may need to respond appropriately to issues the script encounters (eg checking that an impacted question has the expected answers after importing)
 
 ## Potentially Planned Features
 
 - Using each question's marks from the results page (if any) to note down the ones whose answers need manual changes, then highlighting / adding text to those questions while importing
-- Using a more in-depth process to extract text, to utilise image sources for uniquely identifying questions & options
