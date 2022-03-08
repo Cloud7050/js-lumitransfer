@@ -325,12 +325,8 @@
 		}
 
 		let successCount = 0;
-		let entryCount = 0;
 		let entries = [];
 		for (let entryHolder of entryHolders) {
-			entryCount++;
-			l(`⚙️ Processing entry #${entryCount}...`, true);
-
 			let text;
 			let input;
 			if (extractorMode) {
@@ -367,7 +363,7 @@
 			return null;
 		}
 
-		l(`📦 Processed ${successCount}/${entryCount} entries`);
+		l(`(Processed ${successCount}/${entryHolders.length} entries)`);
 		return new BlanksInput(textParts, entries);
 	}
 	function tryProcessResponses(questionHolder, extractorMode) {
@@ -381,12 +377,8 @@
 		}
 
 		let successCount = 0;
-		let entryCount = 0;
 		let entries = [];
 		for (let entryHolder of entryHolders) {
-			entryCount++;
-			l(`⚙️ Processing entry #${entryCount}...`, true);
-
 			let textHolder = entryHolder.querySelector("div.text");
 			if (textHolder === null) {
 				e("No text holder found in entry holder");
@@ -428,7 +420,7 @@
 			return null;
 		}
 
-		l(`📦 Processed ${successCount}/${entryCount} entries`);
+		l(`(Processed ${successCount}/${entryHolders.length} entries)`);
 		return new ResponsesInput(entries);
 	}
 	function tryProcessChoices(questionHolder, extractorMode) {
@@ -443,15 +435,11 @@
 		}
 
 		let successCount = 0;
-		let entryCount = 0;
 		let entries = [];
 
 		let soleButton = null;
 
 		for (let entryHolder of entryHolders) {
-			entryCount++;
-			l(`⚙️ Processing entry #${entryCount}...`, true);
-
 			let textHolder = entryHolder.querySelector("div.text");
 			if (textHolder === null) {
 				e("No text holder found in entry holder");
@@ -504,7 +492,7 @@
 			return null;
 		}
 
-		l(`📦 Processed ${successCount}/${entryCount} entries`);
+		l(`(Processed ${successCount}/${entryHolders.length} entries)`);
 		return new ChoicesInput(entries);
 	}
 
