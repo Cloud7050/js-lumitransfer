@@ -188,12 +188,22 @@
 	}
 
 	function extractTextParts(element) {
+		let whitelistedNodes = [
+			Node.ELEMENT_NODE,
+			Node.TEXT_NODE
+		];
+		let children = [...element.childNodes].filter(
+			(child) => whitelistedNodes.includes(child.nodeType)
+		);
+
 		let textParts = [];
 
-		if (element.children.length === 0) {
+		if (children.length === 0) {
 			// Base case
 
-			if (!element.matches("img")) {
+			let isImage = element.nodeType === Node.ELEMENT_NODE
+				&& element.matches("img");
+			if (!isImage) {
 				textParts.push(
 					new NormalText(element.textContent)
 				);
@@ -205,7 +215,7 @@
 		} else {
 			// Recurse
 
-			[...element.children].forEach((child) => {
+			children.forEach((child) => {
 				textParts = [...textParts, ...extractTextParts(child)];
 			});
 		}
