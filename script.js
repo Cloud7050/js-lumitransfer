@@ -54,6 +54,13 @@
 				}
 			);
 		}
+
+		export() {
+			return {
+				textParts: this.textParts,
+				input: this.input.export()
+			};
+		}
 	}
 
 	class Input {
@@ -68,6 +75,13 @@
 					entries
 				}
 			);
+		}
+
+		export() {
+			return {
+				type: this.type,
+				entries: this.entries.map((entry) => entry.export())
+			};
 		}
 	}
 
@@ -85,6 +99,14 @@
 				this,
 				{ textParts }
 			);
+		}
+
+		export() {
+			return {
+				...super.export(),
+
+				textParts: this.textParts
+			};
 		}
 	}
 
@@ -113,6 +135,10 @@
 				{ control }
 			);
 		}
+
+		export() {
+			return {};
+		}
 	}
 
 	class BlanksEntry extends Entry {
@@ -126,6 +152,14 @@
 				this,
 				{ text }
 			);
+		}
+
+		export() {
+			return {
+				...super.export(),
+
+				text: this.text
+			};
 		}
 	}
 
@@ -144,6 +178,15 @@
 					checked
 				}
 			);
+		}
+
+		export() {
+			return {
+				...super.export(),
+
+				textParts: this.textParts,
+				checked: this.checked
+			};
 		}
 	}
 
@@ -506,6 +549,15 @@
 		return new ChoicesInput(entries);
 	}
 
+	function onStore(questions) {
+		let data = questions.map((question) => question.export());
+		d(data);
+		localStorage.setItem(
+			"LumiTransfer",
+			JSON.stringify(data)
+		);
+	}
+
 
 
 	let scan = onScan();
@@ -513,4 +565,11 @@
 
 	let questions = onProcess(scan.questionHolders, scan.extractorMode);
 	if (questions === null) return;
+
+	if (scan.extractorMode) {
+		onStore(questions);
+		l("✅ Data extracted & stored. Run this script again on your ongoing quiz to import your answers");
+	} else {
+
+	}
 })();
