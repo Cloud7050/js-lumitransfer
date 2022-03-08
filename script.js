@@ -301,6 +301,15 @@
 		});
 	}
 
+	function triggerUpdate(
+		element,
+		type = "change"
+	) {
+		element.dispatchEvent(
+			new Event(type)
+		);
+	}
+
 	function onScan() {
 		let extractorMode;
 		let saveButton;
@@ -656,6 +665,104 @@
 
 		e("⚠️ Your stored answer doesn't match any of this quiz's questions");
 		return false;
+	}
+	function tryImportBlanks(storedInput, pageInput) {
+		let inputQuestionsMatch = compareTextParts(
+			storedInput.textParts,
+			pageInput.textParts
+		);
+		if (!inputQuestionsMatch) return false;
+
+		let storedEntries = storedInput.entries;
+		let pageEntries = pageInput.entries;
+		if (storedEntries.length !== pageEntries.length) return false;
+
+		for (let i = 0; i < storedEntries.length; i++) {
+			let storedEntry = storedEntries[i];
+			let pageEntry = pageEntries[i];
+
+			let control = pageEntry.control;
+
+			control.value = storedEntry.text;
+			triggerUpdate(control, "input");
+		}
+
+		return true;
+	}
+	function tryImportResponses(storedInput, pageInput) {
+		let storedEntries = storedInput.entries;
+		let pageEntries = [...pageInput.entries];
+		if (storedEntries.length !== pageEntries.length) return false;
+
+		let orderedCheckboxes = [];
+
+		// Check if all entries have a match.
+		// Eg header question is likely identical for different sets of entries
+		outerLoop:
+		for (let storedEntry of storedEntries) {
+			for (let i = 0; i < pageEntries.length; i++) {
+				let pageEntry = pageEntries[i];
+
+				if (compareTextParts(
+					storedEntry.textParts,
+					pageEntry.textParts
+				)) {
+					orderedCheckboxes.push(pageEntry.control);
+					// Remove for efficiency, end loop as array mutated
+					pageEntries.splice(i, 1);
+					continue outerLoop;
+				}
+			}
+
+			// No page entries matched the stored entry
+			return false;
+		}
+
+		// Safe to start overwriting
+		for (let i = 0; i < storedEntries.length; i++) {
+			let storedEntry = storedEntries[i];
+			let checkbox = orderedCheckboxes[i];
+
+			checkbox.checked = storedEntry.checked;
+			triggerUpdate(checkbox);
+		}
+
+		return true;
+	}
+	function tryImportChoices(storedInput, pageInput) {
+		let storedEntries = storedInput.entries;
+		let pageEntries = [...pageInput.entries];
+
+		let buttonToCheck = null;
+
+		outerLoop:
+		for (let storedEntry of storedEntries) {
+			for (let i = 0; i < pageEntries.length; i++) {
+				let pageEntry = pageEntries[i];
+
+				if (compareTextParts(
+					storedEntry.textParts,
+					pageEntry.textParts
+				)) {
+					if (storedEntry.checked) buttonToCheck = pageEntry.control;
+
+					pageEntries.splice(i, 1);
+					continue outerLoop;
+				}
+			}
+
+			return false;
+		}
+
+		if (buttonToCheck === null) {
+			w("No button to check in stored entries");
+			return true;
+		}
+
+		buttonToCheck.checked = true;
+		triggerUpdate(buttonToCheck);
+
+		return true;
 	}
 
 	function onStore(questions) {
