@@ -1,4 +1,9 @@
 (() => {
+	const TextPartType = {
+		NORMAL: "normal",
+		IMAGE: "image"
+	};
+
 	const QuestionType = {
 		// Angular fill-in-blanks
 		BLANKS: "fib",
@@ -12,17 +17,37 @@
 	};
 
 	class TextPart {
-		constructor(text) {
+		constructor(
+			type,
+			text
+		) {
 			Object.assign(
 				this,
-				{ text }
+				{
+					type,
+					text
+				}
 			);
 		}
 	}
 
-	class NormalText extends TextPart {}
+	class NormalText extends TextPart {
+		constructor(text) {
+			super(
+				TextPartType.NORMAL,
+				text
+			);
+		}
+	}
 
-	class ImageSource extends TextPart {}
+	class ImageSource extends TextPart {
+		constructor(text) {
+			super(
+				TextPartType.IMAGE,
+				text
+			);
+		}
+	}
 
 	class Scan {
 		constructor(
@@ -197,8 +222,8 @@
 
 
 	function l(content, group = false) {
-		let f = (!group) ? console.log : console.group;
-		f(
+		let consoleFunction = (!group) ? console.log : console.group;
+		consoleFunction(
 			// Skip instanceof check for type object + class String from new String()s
 			(typeof content !== "string")
 				? content
@@ -264,6 +289,16 @@
 		}
 
 		return textParts;
+	}
+
+	function compareTextParts(textParts1, textParts2) {
+		if (textParts1.length !== textParts2.length) return false;
+
+		return textParts1.every((textPart1, index) => {
+			let textPart2 = textParts2[index];
+			return textPart1.type === textPart2.type
+				&& textPart1.text === textPart2.text;
+		});
 	}
 
 	function onScan() {
@@ -332,7 +367,7 @@
 				?? tryProcessResponses(questionHolder, extractorMode)
 				?? tryProcessChoices(questionHolder, extractorMode);
 			if (input === null) {
-				e("⚠️ Question type not supported");
+				e("⚠️ This script doesn't support this type of question");
 				console.groupEnd();
 				continue;
 			}
@@ -549,6 +584,80 @@
 		return new ChoicesInput(entries);
 	}
 
+	function onImport(_pageQuestions, storedData) {
+		// Clone for importOne() to progressively remove overwritten questions
+		let pageQuestions = [..._pageQuestions];
+
+		let successCount = 0;
+		let questionCount = 0;
+		for (let storedQuestion of storedData) {
+			questionCount++;
+			l(`🔮 Importing stored question #${questionCount}...`, true);
+
+			try {
+				let success = importOne(storedQuestion, pageQuestions);
+				if (success) successCount++;
+			} catch (error) {
+				e("⛔ Your stored answer is in a different format. You may be running a newer version of the script on outdated data - try reimporting your answers");
+				e(error);
+			}
+
+			console.groupEnd();
+		}
+
+		l(`☁️ Imported ${successCount}/${questionCount} questions`);
+	}
+	function importOne(storedQuestion, pageQuestions) {
+		let success = false;
+
+		for (let i = 0; i < pageQuestions.length; i++) {
+			let pageQuestion = pageQuestions[i];
+
+			let headerQuestionsMatch = compareTextParts(
+				storedQuestion.textParts,
+				pageQuestion.textParts
+			);
+			if (!headerQuestionsMatch) continue;
+
+			let storedInput = storedQuestion.input;
+			let pageInput = pageQuestion.input;
+			if (storedInput.type !== pageInput.type) continue;
+
+			switch (storedInput.type) {
+				case QuestionType.BLANKS:
+					success = tryImportBlanks(
+						storedInput,
+						pageInput
+					);
+					break;
+				case QuestionType.RESPONSES:
+					success = tryImportResponses(
+						storedInput,
+						pageInput
+					);
+					break;
+				case QuestionType.CHOICES:
+					success = tryImportChoices(
+						storedInput,
+						pageInput
+					);
+					break;
+				default:
+					e("Stored question type not supported");
+					return false;
+			}
+
+			if (success) {
+				// Remove for efficiency
+				pageQuestions.splice(i, 1);
+				return true;
+			}
+		}
+
+		e("⚠️ Your stored answer doesn't match any of this quiz's questions");
+		return false;
+	}
+
 	function onStore(questions) {
 		let data = questions.map((question) => question.export());
 		d(data);
@@ -574,9 +683,15 @@
 			return null;
 		}
 
-		l("💡 Stored data retrieved");
+		l("✨ Stored data retrieved");
 		d(data);
 		return data;
+	}
+
+	function onProperSave(saveButton) {
+		if (saveButton === null) return;
+
+		saveButton.click();
 	}
 
 
@@ -591,7 +706,12 @@
 		onStore(questions);
 		l("✅ Your answers have been extracted & stored. Run this script again on an ongoing quiz attempt to import them");
 	} else {
-		let data = onRetrieve();
-		if (data === null) return;
+		let storedData = onRetrieve();
+		if (storedData === null) return;
+
+		onImport(questions, storedData);
+
+		onProperSave(scan.saveButton);
+		l("✅ Your answers have been retrieved & imported. Matching questions have been overwritten");
 	}
 })();
