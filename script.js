@@ -11,139 +11,20 @@
 		CHOICES: "mcq-tof"
 	};
 
-	class QuestionData {
-		constructor(
-			mainText,
-			inputData
-		) {
+	class TextPart {
+		constructor(text) {
 			Object.assign(
 				this,
-				{
-					mainText,
-					inputData
-				}
+				{ text }
 			);
 		}
 	}
 
-	class QuestionElements {
-		constructor(inputElements) {
-			Object.assign(
-				this,
-				{ inputElements }
-			);
-		}
-	}
+	class NormalText extends TextPart {}
 
-	class InputData {
-		constructor(
-			type,
-			entriesData
-		) {
-			Object.assign(
-				this,
-				{
-					type,
-					entriesData
-				}
-			);
-		}
-	}
+	class ImageSource extends TextPart {}
 
-	class BlanksInputData extends InputData {
-		constructor(
-			entriesData,
-			referenceText
-		) {
-			super(
-				QuestionType.BLANKS,
-				entriesData
-			);
-
-			Object.assign(
-				this,
-				{ referenceText }
-			);
-		}
-	}
-
-	class ResponsesInputData extends InputData {
-		constructor(entriesData) {
-			super(
-				QuestionType.RESPONSES,
-				entriesData
-			);
-		}
-	}
-
-	class ChoicesInputData extends InputData {
-		constructor(entriesData) {
-			super(
-				QuestionType.CHOICES,
-				entriesData
-			);
-		}
-	}
-
-	class InputElements {
-		constructor(entriesElements) {
-			Object.assign(
-				this,
-				{ entriesElements }
-			);
-		}
-	}
-
-	class BlanksInputElements extends InputElements {}
-
-	class ResponsesInputElements extends InputElements {}
-
-	class ChoicesInputElements extends InputElements {}
-
-	class BlanksEntryData {
-		constructor(value) {
-			Object.assign(
-				this,
-				{ value }
-			);
-		}
-	}
-
-	class MultiEntryData {
-		constructor(
-			text,
-			checked
-		) {
-			Object.assign(
-				this,
-				{
-					text,
-					checked
-				}
-			);
-		}
-	}
-
-	class ResponsesEntryData extends MultiEntryData {}
-
-	class ChoicesEntryData extends MultiEntryData {}
-
-	class EntryElements {
-		constructor(control) {
-			Object.assign(
-				this,
-				{ control }
-			);
-		}
-	}
-
-	class BlanksEntryElements extends EntryElements {}
-
-	class ResponsesEntryElements extends EntryElements {}
-
-	class ChoicesEntryElements extends EntryElements {}
-
-	class Mode {
+	class Scan {
 		constructor(
 			extractorMode,
 			questionHolders,
@@ -160,38 +41,121 @@
 		}
 	}
 
-	class QuestionsPair {
+	class Question {
 		constructor(
-			data,
-			elements
+			textParts,
+			input
 		) {
 			Object.assign(
 				this,
 				{
-					data,
-					elements
+					textParts,
+					input
 				}
 			);
 		}
 	}
 
-	class InputPair {
+	class Input {
 		constructor(
-			inputData,
-			inputElements
+			type,
+			entries
 		) {
 			Object.assign(
 				this,
 				{
-					inputData,
-					inputElements
+					type,
+					entries
 				}
 			);
 		}
 	}
 
-	function l(content) {
-		console.log(
+	class BlanksInput extends Input {
+		constructor(
+			textParts,
+			entries
+		) {
+			super(
+				QuestionType.BLANKS,
+				entries
+			);
+
+			Object.assign(
+				this,
+				{ textParts }
+			);
+		}
+	}
+
+	class ResponsesInput extends Input {
+		constructor(entries) {
+			super(
+				QuestionType.RESPONSES,
+				entries
+			);
+		}
+	}
+
+	class ChoicesInput extends Input {
+		constructor(entries) {
+			super(
+				QuestionType.CHOICES,
+				entries
+			);
+		}
+	}
+
+	class Entry {
+		constructor(control) {
+			Object.assign(
+				this,
+				{ control }
+			);
+		}
+	}
+
+	class BlanksEntry extends Entry {
+		constructor(
+			text,
+			control
+		) {
+			super(control);
+
+			Object.assign(
+				this,
+				{ text }
+			);
+		}
+	}
+
+	class CheckedEntry extends Entry {
+		constructor(
+			textParts,
+			checked,
+			control
+		) {
+			super(control);
+
+			Object.assign(
+				this,
+				{
+					textParts,
+					checked
+				}
+			);
+		}
+	}
+
+	class ResponsesEntry extends CheckedEntry {}
+
+	class ChoicesEntry extends CheckedEntry {}
+
+
+
+	function l(content, group = false) {
+		let f = (!group) ? console.log : console.group;
+		f(
 			// Skip instanceof check for type object + class String from new String()s
 			(typeof content !== "string")
 				? content
@@ -223,552 +187,332 @@
 		);
 	}
 
-	function getByTag(parentElement, tag, returnFirstElement = true) {
-		let elements = parentElement.getElementsByTagName(tag);
-		return (!returnFirstElement)
-			? elements
-			: elements?.[0] ?? null;
+	function extractTextParts(element) {
+		let textParts = [];
+
+		if (element.children.length === 0) {
+			// Base case
+
+			if (!element.matches("img")) {
+				textParts.push(
+					new NormalText(element.textContent)
+				);
+			} else {
+				textParts.push(
+					new ImageSource(element.src)
+				);
+			}
+		} else {
+			// Recurse
+
+			[...element.children].forEach((child) => {
+				textParts = [...textParts, ...extractTextParts(child)];
+			});
+		}
+
+		return textParts;
 	}
 
-	function getByClass(parentElement, className, returnFirstElement = true) {
-		let elements = parentElement.getElementsByClassName(className);
-		return (!returnFirstElement)
-			? elements
-			: elements?.[0] ?? null;
-	}
+	function onScan() {
+		let extractorMode;
+		let saveButton;
+		let quizHolder = document.querySelector("quiz-question-results");
 
-	function detectMode() {
-		let extractorMode = true;
-		let saveButton = null;
-
-		let quizHolder = getByTag(document, "quiz-question-results");
 		if (quizHolder !== null) {
 			// Results quiz holder
-			l("📤 Using extractor mode");
+			l("📈 Using extractor mode");
+			extractorMode = true;
+			saveButton = null;
 		} else {
-			quizHolder = getByTag(document, "quiz-question-all");
+			quizHolder = document.querySelector("quiz-question-all");
 			if (quizHolder === null) {
 				e("No quiz holder found in page");
 				return null;
 			}
 
 			// Ongoing quiz holder
+			l("🪄 Using importer mode");
 			extractorMode = false;
-			l("📥 Using importer mode");
 
-			let buttonsHolder = getByClass(quizHolder, "buttons");
-			if (buttonsHolder === null) w("No buttons holder found in quiz holder");
-			else {
-				saveButton = getByClass(buttonsHolder, "btn-default");
-				if (saveButton === null) w("No save button found in buttons holder");
-			}
+			let buttons = quizHolder.querySelectorAll("div.buttons > button");
+			saveButton = [...buttons].find((button) => button.innerText === "Save For Later") ?? null;
+			if (saveButton === null) w("No save button found among buttons");
 		}
 
-		let questionHolders = getByTag(quizHolder, "quiz-question-view", false);
+		let questionHolders = quizHolder.querySelectorAll("quiz-question-view");
 		if (questionHolders.length === 0) {
 			e("No question holders found in quiz holder");
 			return null;
 		}
 
-		return new Mode(
+		return new Scan(
 			extractorMode,
 			questionHolders,
 			saveButton
 		);
 	}
 
-	function extract(questionHolders) {
-		let questionsExtracted = 0;
-		let questionCounter = 0;
-		let data = [];
-		let elements = [];
+	function onProcess(questionHolders, extractorMode) {
+		let successCount = 0;
+		let questionCount = 0;
+		let questions = [];
 
 		for (let questionHolder of questionHolders) {
-			questionCounter++;
-			l(`Extracting question #${questionCounter}...`);
+			questionCount++;
+			l(`⚙️ Processing page's Q${questionCount}...`, true);
 
-			let header = getByClass(questionHolder, "question-header");
-			if (header === null) {
-				w("No header found in question holder");
+			let headerQuestion = questionHolder.querySelector("div.question-header > *");
+			if (headerQuestion === null) {
+				e("No header question found in question holder");
+				console.groupEnd();
 				continue;
 			}
 
-			let mainText = extractMainText(header);
-			if (mainText === null) continue;
-
-			let inputPair = tryExtractBlanks(questionHolder)
-				?? tryExtractResponses(questionHolder)
-				?? tryExtractChoices(questionHolder);
-			if (inputPair === null) {
-				w("⚠️ Question type not supported");
+			let textParts = extractTextParts(headerQuestion);
+			if (textParts.length === 0) {
+				e("No text parts extracted from header question");
+				console.groupEnd();
 				continue;
 			}
 
-			let questionData = new QuestionData(
-				mainText,
-				inputPair.inputData
-			);
-			d(questionData);
+			let input = tryProcessBlanks(questionHolder, extractorMode)
+				?? tryProcessResponses(questionHolder, extractorMode)
+				?? tryProcessChoices(questionHolder, extractorMode);
+			if (input === null) {
+				e("⚠️ Question type not supported");
+				console.groupEnd();
+				continue;
+			}
 
-			data.push(questionData);
-			elements.push(
-				new QuestionElements(
-					inputPair.inputElements
-				)
-			);
+			let question = new Question(textParts, input);
+			d(question);
 
-			questionsExtracted++;
+			questions.push(question);
+			successCount++;
+			console.groupEnd();
 		}
 
-		if (data.length === 0) {
-			e("Nothing extractable found in question holders");
+		if (questions.length === 0) {
+			e("No questions extracted from question holders");
 			return null;
 		}
 
-		l(`Extracted ${questionsExtracted}/${questionCounter} question(s)`);
-
-		let questionsPair = new QuestionsPair(
-			data,
-			elements
-		);
-		d(questionsPair);
-		return questionsPair;
+		l(`📦 Processed ${successCount}/${questionCount} questions`);
+		d(questions);
+		return questions;
 	}
-	function extractMainText(header) {
-		let mainText = Array.from(header.children)
-			.reduce(
-				(output, child) => {
-					// To prevent mismatches due to weird extra elements containing whitespace when viewing results
-					let trimmed = child.innerText.trim();
-					return output + trimmed;
-				},
-				""
-			);
-
-		// Ignore marks, would be missing from results if marks per question are hidden
-		mainText = /^(?<front>[\s\S]+?)(?:\(\d*\.?\d* marks?\))?$/u.exec(mainText)?.groups?.front;
-		if (mainText === undefined) {
-			w("No main text found in header");
-			return null;
-		}
-
-		return mainText;
-	}
-	function tryExtractBlanks(questionHolder) {
-		let blanksHolder = getByTag(questionHolder, "question-view-fib");
+	function tryProcessBlanks(questionHolder, extractorMode) {
+		// Check if is this question type
+		let blanksHolder = questionHolder.querySelector("question-view-fib");
 		if (blanksHolder === null) return null;
 
-		let referenceText = null;
-		let question = getByClass(blanksHolder, "question");
-		if (question === null) l("No question found in blanks holder");
-		else referenceText = question.innerText.trim();
-
-		let inputs = getByClass(blanksHolder, "input", false);
-		if (inputs.length === 0) {
-			w("No inputs found in blanks holder");
+		let blanksQuestion = blanksHolder.querySelector("span.question");
+		if (blanksQuestion === null) {
+			e("No blanks question found in blanks holder");
 			return null;
 		}
 
-		let entriesData = [];
-		let entriesElements = [];
-		for (let input of inputs) {
-			// Results have an additional textarea
-			let textarea = getByClass(input, "answer-fib");
-			let value = textarea?.value ?? null;
+		let textParts = extractTextParts(blanksQuestion);
+		if (textParts.length === 0) {
+			e("No text parts extracted from blanks question");
+			return null;
+		}
 
-			let control = getByClass(input, "form-control");
-			if (control === null) {
-				w("No control found in input");
-				continue;
+		let entryHolders = blanksHolder.querySelectorAll("div.input");
+		if (entryHolders.length === 0) {
+			e("No entry holders found in blanks holder");
+			return null;
+		}
+
+		let successCount = 0;
+		let entryCount = 0;
+		let entries = [];
+		for (let entryHolder of entryHolders) {
+			entryCount++;
+			l(`⚙️ Processing entry #${entryCount}...`, true);
+
+			let text;
+			let input;
+			if (extractorMode) {
+				let textarea = entryHolder.querySelector("textarea.answer-fib");
+				if (textarea === null) {
+					e("No textarea found in entry holder");
+					console.groupEnd();
+					continue;
+				}
+
+				text = textarea.value;
+
+				input = null;
+			} else {
+				text = null;
+
+				input = entryHolder.querySelector("input.form-control");
+				if (input === null) {
+					e("No input found in entry holder");
+					console.groupEnd();
+					continue;
+				}
 			}
 
-			entriesData.push(
-				new BlanksEntryData(value)
+			entries.push(
+				new BlanksEntry(text, input)
 			);
-			entriesElements.push(
-				new BlanksEntryElements(control)
-			);
+			successCount++;
+			console.groupEnd();
 		}
 
-		if (entriesData.length === 0) {
-			w("No extractable entries found in question holder");
+		if (entries.length === 0) {
+			e("No entries extracted from entry holders");
 			return null;
 		}
 
-		return new InputPair(
-			new BlanksInputData(
-				entriesData,
-				referenceText
-			),
-			new BlanksInputElements(entriesElements)
-		);
+		l(`📦 Processed ${successCount}/${entryCount} entries`);
+		return new BlanksInput(textParts, entries);
 	}
-	function tryExtractResponses(questionHolder) {
-		let responsesHolder = getByTag(questionHolder, "question-view-mrq");
+	function tryProcessResponses(questionHolder, extractorMode) {
+		let responsesHolder = questionHolder.querySelector("question-view-mrq");
 		if (responsesHolder === null) return null;
 
-		let options = getByClass(responsesHolder, "option-content", false);
-		if (options.length === 0) {
-			w("No options found in responses holder");
+		let entryHolders = responsesHolder.querySelectorAll("div.option-content");
+		if (entryHolders.length === 0) {
+			e("No entry holders found in responses holder");
 			return null;
 		}
 
-		let entriesData = [];
-		let entriesElements = [];
-		for (let option of options) {
-			let textHolder = getByClass(option, "text");
+		let successCount = 0;
+		let entryCount = 0;
+		let entries = [];
+		for (let entryHolder of entryHolders) {
+			entryCount++;
+			l(`⚙️ Processing entry #${entryCount}...`, true);
+
+			let textHolder = entryHolder.querySelector("div.text");
 			if (textHolder === null) {
-				w("No text holder found in option");
+				e("No text holder found in entry holder");
+				console.groupEnd();
 				continue;
 			}
 
-			let text = textHolder.innerText.trim();
-			if (text.length === 0) {
-				w("No text found in text holder");
+			let textParts = extractTextParts(textHolder);
+			if (textParts.length === 0) {
+				e("No text parts extracted from text holder");
+				console.groupEnd();
 				continue;
 			}
 
-			let checkboxHolder = getByClass(option, "checkbox");
-			if (checkboxHolder === null) {
-				w("No checkbox holder found in option");
-				continue;
-			}
-
-			let checkbox = getByTag(checkboxHolder, "input");
+			let checkbox = entryHolder.querySelector("input[type=checkbox]");
 			if (checkbox === null) {
-				w("No checkbox found in checkbox holder");
+				e("No checkbox found in entry holder");
+				console.groupEnd();
 				continue;
 			}
 
-			let checked = checkbox.checked;
+			let checked = extractorMode
+				? checkbox.checked
+				: null;
 
-			entriesData.push(
-				new ResponsesEntryData(
-					text,
-					checked
+			entries.push(
+				new ResponsesEntry(
+					textParts,
+					checked,
+					checkbox
 				)
 			);
-			entriesElements.push(
-				new ResponsesEntryElements(checkbox)
-			);
+			successCount++;
+			console.groupEnd();
 		}
 
-		if (entriesData.length === 0) {
-			w("No extractable entries found in question holder");
+		if (entries.length === 0) {
+			e("No entries extracted from entry holders");
 			return null;
 		}
 
-		return new InputPair(
-			new ResponsesInputData(entriesData),
-			new ResponsesInputElements(entriesElements)
-		);
+		l(`📦 Processed ${successCount}/${entryCount} entries`);
+		return new ResponsesInput(entries);
 	}
-	function tryExtractChoices(questionHolder) {
-		let choicesHolder = getByTag(questionHolder, "question-view-mcq")
-			?? getByTag(questionHolder, "question-view-tof");
+	function tryProcessChoices(questionHolder, extractorMode) {
+		let choicesHolder = questionHolder.querySelector("question-view-mcq")
+			?? questionHolder.querySelector("question-view-tof");
 		if (choicesHolder === null) return null;
 
-		let options = getByClass(choicesHolder, "option-content", false);
-		if (options.length === 0) {
-			w("No options found in choices holder");
+		let entryHolders = choicesHolder.querySelectorAll("div.option-content");
+		if (entryHolders.length === 0) {
+			e("No entry holders found in choices holder");
 			return null;
 		}
 
-		let entriesData = [];
-		let entriesElements = [];
-		for (let option of options) {
-			let textHolder = getByClass(option, "text");
+		let successCount = 0;
+		let entryCount = 0;
+		let entries = [];
+
+		let soleButton = null;
+
+		for (let entryHolder of entryHolders) {
+			entryCount++;
+			l(`⚙️ Processing entry #${entryCount}...`, true);
+
+			let textHolder = entryHolder.querySelector("div.text");
 			if (textHolder === null) {
-				w("No text holder found in option");
+				e("No text holder found in entry holder");
+				console.groupEnd();
 				continue;
 			}
 
-			let text = textHolder.innerText.trim();
-			if (text.length === 0) {
-				w("No text found in text holder");
+			let textParts = extractTextParts(textHolder);
+			if (textParts.length === 0) {
+				e("No text parts extracted from text holder");
+				console.groupEnd();
 				continue;
 			}
 
-			let buttonHolder = getByClass(option, "radio");
-			if (buttonHolder === null) {
-				w("No button holder found in option");
-				continue;
-			}
-
-			let button = getByTag(buttonHolder, "input");
+			let button = entryHolder.querySelector("input[type=radio]");
 			if (button === null) {
-				w("No button found in button holder");
+				e("No button found in entry holder");
+				console.groupEnd();
 				continue;
 			}
 
-			let checked = button.checked;
+			let checked;
+			if (extractorMode) {
+				checked = button.checked;
 
-			entriesData.push(
-				new ChoicesEntryData(
-					text,
-					checked
-				)
-			);
-			entriesElements.push(
-				new ChoicesEntryElements(button)
-			);
-		}
-
-		if (entriesElements.length === 0) {
-			w("No extractable entries found in question holder");
-			return null;
-		}
-
-		return new InputPair(
-			new ChoicesInputData(entriesData),
-			new ChoicesInputElements(entriesElements)
-		);
-	}
-
-	function importUsing(storedData, questionsPair) {
-		// Clone for importOne() to splice later as questions get overwritten
-		let destinationData = [...questionsPair.data];
-		let destinationElements = [...questionsPair.elements];
-
-		let questionsImported = 0;
-		let questionCounter = 0;
-
-		for (let storedQuestionData of storedData) {
-			questionCounter++;
-			l(`Importing stored question #${questionCounter}...`);
-
-			try {
-				let success = importOne(storedQuestionData, destinationData, destinationElements);
-				if (success) questionsImported++;
-			} catch (error) {
-				e("Stored question data is in wrong format");
-				e(error);
-			}
-		}
-
-		l(`Imported ${questionsImported}/${questionCounter} question(s)`);
-	}
-	function importOne(storedQuestionData, destinationData, destinationElements) {
-		let success = false;
-
-		for (let i = 0; i < destinationData.length; i++) {
-			let destinationQuestionData = destinationData[i];
-			let destinationQuestionElements = destinationElements[i];
-
-			if (storedQuestionData.mainText !== destinationQuestionData.mainText) continue;
-
-			let storedInputData = storedQuestionData.inputData;
-			let destinationInputData = destinationQuestionData.inputData;
-			let destinationInputElements = destinationQuestionElements.inputElements;
-
-			if (storedInputData.type !== destinationInputData.type) continue;
-
-			switch (storedInputData.type) {
-				case QuestionType.BLANKS:
-					success = tryImportBlanks(
-						storedInputData,
-						destinationInputData,
-						destinationInputElements
-					);
-					break;
-				case QuestionType.RESPONSES:
-					success = tryImportResponses(
-						storedInputData,
-						destinationInputData,
-						destinationInputElements
-					);
-					break;
-				case QuestionType.CHOICES:
-					success = tryImportChoices(
-						storedInputData,
-						destinationInputData,
-						destinationInputElements
-					);
-					break;
-				default:
-					w("Stored question type not supported");
-					return false;
-			}
-
-			if (success) {
-				// Remove for efficiency
-				destinationData.splice(i, 1);
-				destinationElements.splice(i, 1);
-				break;
-			}
-		}
-
-		if (!success) w("No matches for stored question data");
-
-		return success;
-	}
-	function tryImportBlanks(
-		storedInputData,
-		destinationInputData,
-		destinationInputElements
-	) {
-		if (storedInputData.referenceText !== destinationInputData.referenceText) return false;
-
-		let storedEntriesData = storedInputData.entriesData;
-		let destinationEntriesElements = destinationInputElements.entriesElements;
-		for (let i = 0; i < storedEntriesData.length; i++) {
-			let entryData = storedEntriesData[i];
-			let entryElements = destinationEntriesElements[i];
-
-			let control = entryElements.control;
-
-			control.value = entryData.value;
-			triggerUpdate(
-				control,
-				"input"
-			);
-		}
-
-		return true;
-	}
-	function tryImportResponses(
-		storedInputData,
-		destinationInputData,
-		destinationInputElements
-	) {
-		let storedEntriesData = storedInputData.entriesData;
-		let destinationEntriesData = destinationInputData.entriesData;
-		let destinationEntriesElements = destinationInputElements.entriesElements;
-
-		let orderedCheckboxes = [];
-
-		// Check if all entries have a match.
-		// Eg question main text may be identical for different sets of entries
-		outerLoop:
-		for (let storedEntryData of storedEntriesData) {
-			for (let i = 0; i < destinationEntriesData.length; i++) {
-				let destinationEntryData = destinationEntriesData[i];
-				let destinationEntryElement = destinationEntriesElements[i];
-
-				if (
-					storedEntryData.text === destinationEntryData.text
-				) {
-					orderedCheckboxes.push(destinationEntryElement.control);
-					continue outerLoop;
-				}
-			}
-
-			return false;
-		}
-
-		// Safe to start overwriting
-		for (let i = 0; i < storedEntriesData.length; i++) {
-			let storedEntryData = storedEntriesData[i];
-			let checkbox = orderedCheckboxes[i];
-
-			checkbox.checked = storedEntryData.checked;
-			triggerUpdate(checkbox);
-		}
-
-		return true;
-	}
-	function tryImportChoices(
-		storedInputData,
-		destinationInputData,
-		destinationInputElements
-	) {
-		let storedEntriesData = storedInputData.entriesData;
-		let destinationEntriesData = destinationInputData.entriesData;
-		let destinationEntriesElements = destinationInputElements.entriesElements;
-
-		let buttonToCheck = null;
-
-		outerLoop:
-		for (let storedEntryData of storedEntriesData) {
-			let storeMatchingButton = storedEntryData.checked;
-
-			for (let i = 0; i < destinationEntriesData.length; i++) {
-				let destinationEntryData = destinationEntriesData[i];
-				let destinationEntryElement = destinationEntriesElements[i];
-
-				if (
-					storedEntryData.text === destinationEntryData.text
-				) {
-					if (storeMatchingButton) {
-						buttonToCheck = buttonToCheck ?? destinationEntryElement.control;
+				if (checked) {
+					if (soleButton !== null) {
+						e("Multiple checked buttons found in entry holders");
+						console.groupEnd();
+						return null;
 					}
 
-					continue outerLoop;
+					soleButton = button;
 				}
-			}
+			} else checked = null;
 
-			return false;
+			entries.push(
+				new ChoicesEntry(
+					textParts,
+					checked,
+					button
+				)
+			);
+			successCount++;
+			console.groupEnd();
 		}
 
-		if (buttonToCheck === null) {
-			w("No button to check in stored input data");
-			return true;
-		}
-
-		buttonToCheck.checked = true;
-		triggerUpdate(buttonToCheck);
-
-		return true;
-	}
-	function triggerUpdate(
-		element,
-		type = "change"
-	) {
-		element.dispatchEvent(
-			new Event(type)
-		);
-	}
-
-	function storeData(data) {
-		localStorage.setItem(
-			"LumiTransfer",
-			JSON.stringify(data)
-		);
-	}
-
-	function retrieveData() {
-		let rawData = localStorage.getItem("LumiTransfer");
-		if (rawData === null) {
-			e("⛔ No stored data found. Run this script on the quiz results to extract from first");
+		if (entries.length === 0) {
+			e("No entries extracted from entry holders");
 			return null;
 		}
 
-		let data;
-		try {
-			data = JSON.parse(rawData);
-		} catch (syntaxError) {
-			e("Stored data unreadable");
-			e(syntaxError);
-			return null;
-		}
-
-		d(data);
-		return data;
-	}
-
-	function properSave(saveButton) {
-		if (saveButton === null) return;
-
-		saveButton.click();
+		l(`📦 Processed ${successCount}/${entryCount} entries`);
+		return new ChoicesInput(entries);
 	}
 
 
 
-	let mode = detectMode();
-	if (mode === null) return;
+	let scan = onScan();
+	if (scan === null) return;
 
-	let questionsPair = extract(mode.questionHolders);
-	if (questionsPair === null) return;
-
-	if (mode.extractorMode) {
-		storeData(questionsPair.data);
-		l("✅ Data extracted & stored. Run this script again on the ongoing quiz to import into");
-	} else {
-		let storedData = retrieveData();
-		if (storedData === null) return;
-
-		importUsing(storedData, questionsPair);
-		properSave(mode.saveButton);
-		l("✅ Data retrieved & imported. Matching questions overwritten");
-	}
+	let questions = onProcess(scan.questionHolders, scan.extractorMode);
+	if (questions === null) return;
 })();
