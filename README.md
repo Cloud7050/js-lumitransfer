@@ -15,6 +15,8 @@ Supported question types:
 - Multiple Response Questions (MRQs)
 - Multiple Choice Questions (MCQs) & true-or-false questions
 
+This script works by extracting & storing your quiz results' questions & answers locally. It can then retrieve & import that into your ongoing attempts. Additionally, it stores your marks per question (if shown), to use when importing to highlight the answers you may wish to modify.
+
 ⚠️ Strictly not to be used for academic dishonesty!
 
 ## Instructions
@@ -29,8 +31,8 @@ You do not need to download/install anything or know how to code to use these sc
 
 If you keep the script copied to your clipboard, it should be pretty easy to rapidly extract & import your quiz answers back-to-back as you make multiple similar attempts.
 
-Video showcase (slightly old): <https://youtu.be/pnGHU86THv4>
+Video showcase (older footage): <https://youtu.be/pnGHU86THv4>
 
 ## Note
 
-Keep an eye out for any yellow warnings (or even red errors) that the script may log while running. You may need to respond appropriately to issues the script encounters (eg checking that an impacted question has the expected answers after importing)
+Keep an eye out for any yellow warnings (or even red errors) that the script may log while running. You may need to respond appropriately to issues the script encounters (eg checking that an impacted question has the expected answers after importing). Feel free to contact me about bugs or features on Discord @ Cloud#4535
