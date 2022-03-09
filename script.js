@@ -380,17 +380,19 @@
 				continue;
 			}
 
-			let marksReport = questionHolder.querySelector("div.mark-obtained > span");
 			let actualMarks = null;
 			let maxMarks = null;
-			if (marksReport !== null) {
-				let regex = /^You scored (?<actualMarks>\d+(?:\.\d+)?) \/ (?<maxMarks>\d+(?:\.\d+)?) marks?$/u;
-				let result = regex.exec(marksReport.innerText);
-				if (result === null) w("Unrecognised marks format in marks report");
-				else {
-					let resultGroups = result.groups;
-					actualMarks = resultGroups.actualMarks;
-					maxMarks = resultGroups.maxMarks;
+			if (extractorMode) {
+				let marksReport = questionHolder.querySelector("div.mark-obtained > span");
+				if (marksReport !== null) {
+					let regex = /^You scored (?<actualMarks>\d+(?:\.\d+)?) \/ (?<maxMarks>\d+(?:\.\d+)?) marks?$/u;
+					let result = regex.exec(marksReport.innerText);
+					if (result === null) w("Unrecognised marks format in marks report");
+					else {
+						let resultGroups = result.groups;
+						actualMarks = resultGroups.actualMarks;
+						maxMarks = resultGroups.maxMarks;
+					}
 				}
 			}
 
@@ -691,6 +693,24 @@
 			}
 
 			if (success) {
+				let marksHint = pageQuestion.marksHint;
+				let actualMarks = storedQuestion.actualMarks;
+				let maxMarks = storedQuestion.maxMarks;
+				if (
+					marksHint !== null
+					&& actualMarks !== null
+					&& maxMarks !== null
+				) {
+					marksHint.textContent = `☁️ Imported Marks: ${actualMarks} / ${maxMarks}`;
+
+					if (actualMarks < maxMarks) {
+						let outerQuestionHolder = marksHint.parentElement.parentElement.parentElement;
+						let cssStyle = outerQuestionHolder.style;
+						cssStyle["background-color"] = "#D5FFEA";
+						cssStyle["border-top-right-radius"] = "100px";
+					}
+				}
+
 				// Remove for efficiency
 				pageQuestions.splice(i, 1);
 				return true;
