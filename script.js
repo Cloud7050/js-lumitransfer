@@ -69,12 +69,16 @@
 	class Question {
 		constructor(
 			textParts,
+			actualMarks,
+			maxMarks,
 			input
 		) {
 			Object.assign(
 				this,
 				{
 					textParts,
+					actualMarks,
+					maxMarks,
 					input
 				}
 			);
@@ -83,6 +87,8 @@
 		export() {
 			return {
 				textParts: this.textParts,
+				actualMarks: this.actualMarks,
+				maxMarks: this.maxMarks,
 				input: this.input.export()
 			};
 		}
@@ -372,6 +378,20 @@
 				continue;
 			}
 
+			let marksHolder = questionHolder.querySelector("div.mark-obtained > span");
+			let actualMarks = null;
+			let maxMarks = null;
+			if (marksHolder !== null) {
+				let regex = /^You scored (?<actualMarks>\d+(?:\.\d+)?) \/ (?<maxMarks>\d+(?:\.\d+)?) marks?$/u;
+				let result = regex.exec(marksHolder.innerText);
+				if (result === null) w("Unrecognised marks format in marks holder");
+				else {
+					let resultGroups = result.groups;
+					actualMarks = resultGroups.actualMarks;
+					maxMarks = resultGroups.maxMarks;
+				}
+			}
+
 			let input = tryProcessBlanks(questionHolder, extractorMode)
 				?? tryProcessResponses(questionHolder, extractorMode)
 				?? tryProcessChoices(questionHolder, extractorMode);
@@ -381,7 +401,12 @@
 				continue;
 			}
 
-			let question = new Question(textParts, input);
+			let question = new Question(
+				textParts,
+				actualMarks,
+				maxMarks,
+				input
+			);
 			d(question);
 
 			questions.push(question);
