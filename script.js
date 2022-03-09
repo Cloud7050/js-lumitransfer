@@ -52,14 +52,14 @@
 	class Scan {
 		constructor(
 			extractorMode,
-			questionHolders,
+			questionRows,
 			saveButton
 		) {
 			Object.assign(
 				this,
 				{
 					extractorMode,
-					questionHolders,
+					questionRows,
 					saveButton
 				}
 			);
@@ -72,6 +72,7 @@
 			actualMarks,
 			maxMarks,
 			input,
+			questionRow,
 			marksHint
 		) {
 			Object.assign(
@@ -81,6 +82,7 @@
 					actualMarks,
 					maxMarks,
 					input,
+					questionRow,
 					marksHint
 				}
 			);
@@ -344,31 +346,31 @@
 			if (saveButton === null) w("No save button found among buttons");
 		}
 
-		let questionHolders = quizHolder.querySelectorAll("quiz-question-view");
-		if (questionHolders.length === 0) {
-			e("No question holders found in quiz holder");
+		let questionRows = quizHolder.querySelectorAll("div.question-view");
+		if (questionRows.length === 0) {
+			e("No question rows found in quiz holder");
 			return null;
 		}
 
 		return new Scan(
 			extractorMode,
-			questionHolders,
+			questionRows,
 			saveButton
 		);
 	}
 
-	function onProcess(questionHolders, extractorMode) {
+	function onProcess(questionRows, extractorMode) {
 		let successCount = 0;
 		let questionCount = 0;
 		let questions = [];
 
-		for (let questionHolder of questionHolders) {
+		for (let questionRow of questionRows) {
 			questionCount++;
 			l(`⚙️ Processing page's Q${questionCount}...`, true);
 
-			let headerQuestion = questionHolder.querySelector("div.question-header > *");
+			let headerQuestion = questionRow.querySelector("div.question-header > *");
 			if (headerQuestion === null) {
-				e("No header question found in question holder");
+				e("No header question found in question row");
 				console.groupEnd();
 				continue;
 			}
@@ -383,7 +385,7 @@
 			let actualMarks = null;
 			let maxMarks = null;
 			if (extractorMode) {
-				let marksReport = questionHolder.querySelector("div.mark-obtained > span");
+				let marksReport = questionRow.querySelector("div.mark-obtained > span");
 				if (marksReport !== null) {
 					let regex = /^You scored (?<actualMarks>\d+(?:\.\d+)?) \/ (?<maxMarks>\d+(?:\.\d+)?) marks?$/u;
 					let result = regex.exec(marksReport.innerText);
@@ -396,9 +398,9 @@
 				}
 			}
 
-			let input = tryProcessBlanks(questionHolder, extractorMode)
-				?? tryProcessResponses(questionHolder, extractorMode)
-				?? tryProcessChoices(questionHolder, extractorMode);
+			let input = tryProcessBlanks(questionRow, extractorMode)
+				?? tryProcessResponses(questionRow, extractorMode)
+				?? tryProcessChoices(questionRow, extractorMode);
 			if (input === null) {
 				e("⚠️ This script doesn't support this type of question");
 				console.groupEnd();
@@ -407,11 +409,11 @@
 
 			let marksHint = null;
 			if (!extractorMode) {
-				marksHint = questionHolder.querySelector(
+				marksHint = questionRow.querySelector(
 					"div.question-header > small:nth-child(2)"
 				);
 				if (marksHint === null) {
-					e("No marks hint found in question holder");
+					e("No marks hint found in question row");
 					console.groupEnd();
 					continue;
 				}
@@ -422,6 +424,7 @@
 				actualMarks,
 				maxMarks,
 				input,
+				questionRow,
 				marksHint
 			);
 			d(question);
@@ -432,7 +435,7 @@
 		}
 
 		if (questions.length === 0) {
-			e("No questions extracted from question holders");
+			e("No questions extracted from question rows");
 			return null;
 		}
 
@@ -440,9 +443,9 @@
 		d(questions);
 		return questions;
 	}
-	function tryProcessBlanks(questionHolder, extractorMode) {
+	function tryProcessBlanks(questionRow, extractorMode) {
 		// Check if is this question type
-		let blanksHolder = questionHolder.querySelector("question-view-fib");
+		let blanksHolder = questionRow.querySelector("question-view-fib");
 		if (blanksHolder === null) return null;
 
 		let blanksQuestion = blanksHolder.querySelector("span.question");
@@ -505,8 +508,8 @@
 		l(`(Processed ${successCount}/${entryHolders.length} entries)`);
 		return new BlanksInput(textParts, entries);
 	}
-	function tryProcessResponses(questionHolder, extractorMode) {
-		let responsesHolder = questionHolder.querySelector("question-view-mrq");
+	function tryProcessResponses(questionRow, extractorMode) {
+		let responsesHolder = questionRow.querySelector("question-view-mrq");
 		if (responsesHolder === null) return null;
 
 		let entryHolders = responsesHolder.querySelectorAll("div.option-content");
@@ -562,9 +565,9 @@
 		l(`(Processed ${successCount}/${entryHolders.length} entries)`);
 		return new ResponsesInput(entries);
 	}
-	function tryProcessChoices(questionHolder, extractorMode) {
-		let choicesHolder = questionHolder.querySelector("question-view-mcq")
-			?? questionHolder.querySelector("question-view-tof");
+	function tryProcessChoices(questionRow, extractorMode) {
+		let choicesHolder = questionRow.querySelector("question-view-mcq")
+			?? questionRow.querySelector("question-view-tof");
 		if (choicesHolder === null) return null;
 
 		let entryHolders = choicesHolder.querySelectorAll("div.option-content");
@@ -699,26 +702,29 @@
 			}
 
 			if (success) {
-				let marksHint = pageQuestion.marksHint;
+				// Remove for efficiency
+				pageQuestions.splice(i, 1);
+
 				let actualMarks = storedQuestion.actualMarks;
 				let maxMarks = storedQuestion.maxMarks;
 				if (
-					marksHint !== null
-					&& actualMarks !== null
+					actualMarks !== null
 					&& maxMarks !== null
 				) {
-					marksHint.textContent = `☁️ Imported Marks: ${actualMarks} / ${maxMarks}`;
+					let isWarning = actualMarks < maxMarks;
+					let rgb = (isWarning)
+						? "255 170 0" // Orange
+						: "85 255 170"; // Greenish blue
 
-					if (actualMarks < maxMarks) {
-						let outerQuestionHolder = marksHint.parentElement.parentElement.parentElement;
-						let cssStyle = outerQuestionHolder.style;
-						cssStyle["background-color"] = "#D5FFEA";
-						cssStyle["border-top-right-radius"] = "100px";
-					}
+					let rowStyle = pageQuestion.questionRow.style;
+					rowStyle["background-color"] = `rgb(${rgb} / 10%)`;
+					rowStyle["box-shadow"] = `0px 0px 25px 25px rgb(${rgb} / 10%)`;
+					rowStyle["border-radius"] = "50px";
+
+					//TODO replace, style
+					pageQuestion.marksHint.textContent = `☁️ Imported Marks: ${actualMarks} / ${maxMarks}`;
 				}
 
-				// Remove for efficiency
-				pageQuestions.splice(i, 1);
 				return true;
 			}
 		}
@@ -866,7 +872,7 @@
 	let scan = onScan();
 	if (scan === null) return;
 
-	let questions = onProcess(scan.questionHolders, scan.extractorMode);
+	let questions = onProcess(scan.questionRows, scan.extractorMode);
 	if (questions === null) return;
 
 	if (scan.extractorMode) {
