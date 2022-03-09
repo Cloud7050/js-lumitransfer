@@ -721,8 +721,21 @@
 					rowStyle["box-shadow"] = `0px 0px 25px 25px rgb(${rgb} / 10%)`;
 					rowStyle["border-radius"] = "50px";
 
-					//TODO replace, style
-					pageQuestion.marksHint.textContent = `☁️ Imported Marks: ${actualMarks} / ${maxMarks}`;
+					let newDiv = document.createElement("div");
+					newDiv.textContent = `☁️ Imported Marks: ${actualMarks}/${maxMarks}`;
+
+					let divStyle = newDiv.style;
+					divStyle.display = "inline-block";
+					divStyle["line-height"] = "1";
+					divStyle.padding = "5px";
+					divStyle["font-size"] = "15px";
+					divStyle["font-weight"] = "bold";
+					divStyle["background-color"] = `rgb(${rgb} / 40%)`;
+					divStyle["border-radius"] = "5px";
+
+					let oldSmall = pageQuestion.marksHint;
+					oldSmall.style.display = "none";
+					oldSmall.parentNode.insertBefore(newDiv, oldSmall.nextSibling);
 				}
 
 				return true;
