@@ -71,7 +71,8 @@
 			textParts,
 			actualMarks,
 			maxMarks,
-			input
+			input,
+			marksHint
 		) {
 			Object.assign(
 				this,
@@ -79,7 +80,8 @@
 					textParts,
 					actualMarks,
 					maxMarks,
-					input
+					input,
+					marksHint
 				}
 			);
 		}
@@ -378,13 +380,13 @@
 				continue;
 			}
 
-			let marksHolder = questionHolder.querySelector("div.mark-obtained > span");
+			let marksReport = questionHolder.querySelector("div.mark-obtained > span");
 			let actualMarks = null;
 			let maxMarks = null;
-			if (marksHolder !== null) {
+			if (marksReport !== null) {
 				let regex = /^You scored (?<actualMarks>\d+(?:\.\d+)?) \/ (?<maxMarks>\d+(?:\.\d+)?) marks?$/u;
-				let result = regex.exec(marksHolder.innerText);
-				if (result === null) w("Unrecognised marks format in marks holder");
+				let result = regex.exec(marksReport.innerText);
+				if (result === null) w("Unrecognised marks format in marks report");
 				else {
 					let resultGroups = result.groups;
 					actualMarks = resultGroups.actualMarks;
@@ -401,11 +403,18 @@
 				continue;
 			}
 
+			let marksHint = (extractorMode)
+				? null
+				: questionHolder.querySelector(
+					"div.question-header > small:nth-child(2)"
+				);
+
 			let question = new Question(
 				textParts,
 				actualMarks,
 				maxMarks,
-				input
+				input,
+				marksHint
 			);
 			d(question);
 
