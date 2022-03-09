@@ -34,7 +34,3 @@ Video showcase (slightly old): <https://youtu.be/pnGHU86THv4>
 ## Note
 
 Keep an eye out for any yellow warnings (or even red errors) that the script may log while running. You may need to respond appropriately to issues the script encounters (eg checking that an impacted question has the expected answers after importing)
-
-## Potentially Planned Features
-
-- Using each question's marks from the results page (if any) to note down the ones whose answers need manual changes, then highlighting / adding text to those questions while importing
