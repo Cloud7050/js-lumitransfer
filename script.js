@@ -405,11 +405,17 @@
 				continue;
 			}
 
-			let marksHint = (extractorMode)
-				? null
-				: questionHolder.querySelector(
+			let marksHint = null;
+			if (!extractorMode) {
+				marksHint = questionHolder.querySelector(
 					"div.question-header > small:nth-child(2)"
 				);
+				if (marksHint === null) {
+					e("No marks hint found in question holder");
+					console.groupEnd();
+					continue;
+				}
+			}
 
 			let question = new Question(
 				textParts,
@@ -717,7 +723,7 @@
 			}
 		}
 
-		e("⚠️ Your stored answer doesn't match any of this quiz's questions");
+		e("⚠️ Your stored answer doesn't match any of this quiz's processed questions");
 		return false;
 	}
 	function tryImportBlanks(storedInput, pageInput) {
@@ -844,7 +850,7 @@
 			return null;
 		}
 
-		l("✨ Stored data retrieved");
+		l("✨ Stored answers retrieved");
 		d(data);
 		return data;
 	}
