@@ -722,6 +722,7 @@
 					rowStyle["border-radius"] = "50px";
 
 					let newDiv = document.createElement("div");
+					newDiv.setAttribute("tag-custom", "");
 					newDiv.textContent = `☁️ Imported Marks: ${actualMarks}/${maxMarks}`;
 
 					let divStyle = newDiv.style;
@@ -734,8 +735,16 @@
 					divStyle["border-radius"] = "5px";
 
 					let oldSmall = pageQuestion.marksHint;
+					let potentialExistingDiv = oldSmall.nextSibling;
+					if (
+						potentialExistingDiv?.nodeType === Node.ELEMENT_NODE
+						&& potentialExistingDiv.hasAttribute("tag-custom")
+					) potentialExistingDiv.remove();
+
 					oldSmall.style.display = "none";
-					oldSmall.parentNode.insertBefore(newDiv, oldSmall.nextSibling);
+					let potentialNextSibling = oldSmall.nextSibling;
+					// Inserts at the end if potentialNextSibling is null (if oldSmall is already last element)
+					oldSmall.parentNode.insertBefore(newDiv, potentialNextSibling);
 				}
 
 				return true;
