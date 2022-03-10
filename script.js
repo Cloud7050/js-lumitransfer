@@ -392,8 +392,8 @@
 					if (result === null) w("Unrecognised marks format in marks report");
 					else {
 						let resultGroups = result.groups;
-						actualMarks = resultGroups.actualMarks;
-						maxMarks = resultGroups.maxMarks;
+						actualMarks = parseFloat(resultGroups.actualMarks);
+						maxMarks = parseFloat(resultGroups.maxMarks);
 					}
 				}
 			}
