@@ -312,12 +312,14 @@
 		return textParts;
 	}
 	function extractTextPart(node, parentNode) {
+		let text = node.textContent;
+
 		if (
 			parentNode !== null
 			&& parentNode.matches("em.question-blank")
 		) {
 			let regex = /^(?<blankNumber>\d+)(?:\. (?<answer>[\s\S]*))?$/u;
-			let result = regex.exec(node.textContent);
+			let result = regex.exec(text);
 			if (result === null) {
 				e("Unrecognised blank format in answer blank");
 				return null;
@@ -335,7 +337,7 @@
 			&& node.matches("img")
 		) return new ImageSource(node.src);
 
-		return new NormalText(node.textContent);
+		return new NormalText(text);
 	}
 
 	function compareTextParts(textParts1, textParts2) {
@@ -496,6 +498,7 @@
 			e("No text parts extracted from blanks question");
 			return null;
 		}
+		let answerBlanks = textParts.filter((textPart) => textPart.type === TextPartType.ANSWER);
 
 		let entryHolders = blanksHolder.querySelectorAll("div.input");
 		if (entryHolders.length === 0) {
@@ -503,9 +506,19 @@
 			return null;
 		}
 
+		let answerBlankCount = answerBlanks.length;
+		let entryHolderCount = entryHolders.length;
+		if (answerBlankCount !== entryHolderCount) {
+			e(`Number of answer blanks (${answerBlankCount}) doesn't match number of entry holders (${entryHolderCount})`);
+			return null;
+		}
+
 		let successCount = 0;
 		let entries = [];
-		for (let entryHolder of entryHolders) {
+		for (let i = 0; i < answerBlanks.length; i++) {
+			let answerBlank = answerBlanks[i];
+			let entryHolder = entryHolders[i];
+
 			let text;
 			let input;
 			if (extractorMode) {
@@ -517,6 +530,7 @@
 				}
 
 				text = textarea.value;
+				if (text === "") text = answerBlank.answer;
 
 				input = null;
 			} else {
