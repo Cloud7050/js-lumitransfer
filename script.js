@@ -1,6 +1,7 @@
 (() => {
 	const TextPartType = {
 		NORMAL: "normal",
+		ANSWER: "answer",
 		IMAGE: "image"
 	};
 
@@ -40,11 +41,28 @@
 		}
 	}
 
+	class AnswerBlank extends TextPart {
+		constructor(
+			blankNumber,
+			answer
+		) {
+			super(
+				TextPartType.ANSWER,
+				blankNumber
+			);
+
+			Object.assign(
+				this,
+				{ answer }
+			);
+		}
+	}
+
 	class ImageSource extends TextPart {
-		constructor(text) {
+		constructor(source) {
 			super(
 				TextPartType.IMAGE,
-				text
+				source
 			);
 		}
 	}
@@ -265,12 +283,12 @@
 		);
 	}
 
-	function extractTextParts(element) {
+	function extractTextParts(node, parentNode = null) {
 		let whitelistedNodes = [
 			Node.ELEMENT_NODE,
 			Node.TEXT_NODE
 		];
-		let children = [...element.childNodes].filter(
+		let children = [...node.childNodes].filter(
 			(child) => whitelistedNodes.includes(child.nodeType)
 		);
 
@@ -279,26 +297,45 @@
 		if (children.length === 0) {
 			// Base case
 
-			let isImage = element.nodeType === Node.ELEMENT_NODE
-				&& element.matches("img");
-			if (!isImage) {
-				textParts.push(
-					new NormalText(element.textContent)
-				);
-			} else {
-				textParts.push(
-					new ImageSource(element.src)
-				);
-			}
+			let textPart = extractTextPart(node, parentNode);
+			if (textPart === null) return [];
+
+			textParts.push(textPart);
 		} else {
 			// Recurse
 
 			children.forEach((child) => {
-				textParts = [...textParts, ...extractTextParts(child)];
+				textParts = [...textParts, ...extractTextParts(child, node)];
 			});
 		}
 
 		return textParts;
+	}
+	function extractTextPart(node, parentNode) {
+		if (
+			parentNode !== null
+			&& parentNode.matches("em.question-blank")
+		) {
+			let regex = /^(?<blankNumber>\d+)(?:\. (?<answer>[\s\S]*))?$/u;
+			let result = regex.exec(node.textContent);
+			if (result === null) {
+				e("Unrecognised blank format in answer blank");
+				return null;
+			}
+
+			let resultGroups = result.groups;
+			return new AnswerBlank(
+				resultGroups.blankNumber,
+				resultGroups.answer ?? null
+			);
+		}
+
+		if (
+			node.nodeType === Node.ELEMENT_NODE
+			&& node.matches("img")
+		) return new ImageSource(node.src);
+
+		return new NormalText(node.textContent);
 	}
 
 	function compareTextParts(textParts1, textParts2) {
@@ -342,7 +379,7 @@
 			extractorMode = false;
 
 			let buttons = quizHolder.querySelectorAll("div.buttons > button");
-			saveButton = [...buttons].find((button) => button.innerText === "Save For Later") ?? null;
+			saveButton = [...buttons].find((button) => button.textContent === "Save For Later") ?? null;
 			if (saveButton === null) w("No save button found among buttons");
 		}
 
@@ -388,7 +425,7 @@
 				let marksReport = questionRow.querySelector("div.mark-obtained > span");
 				if (marksReport !== null) {
 					let regex = /^You scored (?<actualMarks>\d+(?:\.\d+)?) \/ (?<maxMarks>\d+(?:\.\d+)?) marks?$/u;
-					let result = regex.exec(marksReport.innerText);
+					let result = regex.exec(marksReport.textContent);
 					if (result === null) w("Unrecognised marks format in marks report");
 					else {
 						let resultGroups = result.groups;
@@ -743,7 +780,7 @@
 
 					oldSmall.style.display = "none";
 					let potentialNextSibling = oldSmall.nextSibling;
-					// Inserts at the end if potentialNextSibling is null (if oldSmall is already last element)
+					// Inserts at the end if potentialNextSibling is null (if oldSmall is already last node)
 					oldSmall.parentNode.insertBefore(newDiv, potentialNextSibling);
 				}
 
