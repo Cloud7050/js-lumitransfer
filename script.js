@@ -431,7 +431,7 @@
 				?? tryProcessResponses(questionRow, extractorMode)
 				?? tryProcessChoices(questionRow, extractorMode);
 			if (input === null) {
-				e("⚠️ This script doesn't support this type of question");
+				e("⚠️ This type of question isn't supported");
 				console.groupEnd();
 				continue;
 			}
@@ -499,8 +499,7 @@
 		let answerBlankCount = answerBlanks.length;
 		let entryHolderCount = entryHolders.length;
 		if (answerBlankCount !== entryHolderCount) {
-			e(`Number of answer blanks (${answerBlankCount}) doesn't match number of entry holders (${entryHolderCount})`);
-			return null;
+			w(`Number of answer blanks (${answerBlankCount}) doesn't match number of entry holders (${entryHolderCount})`);
 		}
 
 		let successCount = 0;
@@ -880,7 +879,7 @@
 		}
 
 		if (buttonToCheck === null) {
-			w("No button to check in stored entries");
+			e("No button to check in stored entries");
 			return true;
 		}
 
