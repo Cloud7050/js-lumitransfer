@@ -248,7 +248,7 @@ module.exports = {
 		// "no-nonoctal-decimal-escape": 2,
 		// "no-octal": 2,
 		"no-octal-escape": 2,
-		"no-param-reassign": 1,
+		// "no-param-reassign": 0,
 		// "no-plusplus": 0,
 		"no-proto": 1,
 		"no-redeclare": 1, // Was 2
