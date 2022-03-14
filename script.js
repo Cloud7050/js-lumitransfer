@@ -1,7 +1,7 @@
 (() => {
 	const TextPartType = {
 		NORMAL: "normal",
-		ANSWER: "answer",
+		BLANK: "blank",
 		IMAGE: "image"
 	};
 
@@ -42,18 +42,10 @@
 	}
 
 	class AnswerBlank extends TextPart {
-		constructor(
-			blankNumber,
-			answer
-		) {
+		constructor(blankNumber) {
 			super(
-				TextPartType.ANSWER,
+				TextPartType.BLANK,
 				blankNumber
-			);
-
-			Object.assign(
-				this,
-				{ answer }
 			);
 		}
 	}
@@ -318,17 +310,15 @@
 			parentNode !== null
 			&& parentNode.matches("em.question-blank")
 		) {
-			let regex = /^(?<blankNumber>\d+)(?:\. (?<answer>[\s\S]*))?$/u;
+			let regex = /^(?<blankNumber>\d+)(?:\. [\s\S]*)?$/u;
 			let result = regex.exec(text);
 			if (result === null) {
 				e("Unrecognised blank format in answer blank");
 				return null;
 			}
 
-			let resultGroups = result.groups;
 			return new AnswerBlank(
-				resultGroups.blankNumber,
-				resultGroups.answer ?? null
+				result.groups.blankNumber
 			);
 		}
 
@@ -498,7 +488,7 @@
 			e("No text parts extracted from blanks question");
 			return null;
 		}
-		let answerBlanks = textParts.filter((textPart) => textPart.type === TextPartType.ANSWER);
+		let answerBlanks = textParts.filter((textPart) => textPart.type === TextPartType.BLANK);
 
 		let entryHolders = blanksHolder.querySelectorAll("div.input");
 		if (entryHolders.length === 0) {
@@ -515,10 +505,7 @@
 
 		let successCount = 0;
 		let entries = [];
-		for (let i = 0; i < answerBlanks.length; i++) {
-			let answerBlank = answerBlanks[i];
-			let entryHolder = entryHolders[i];
-
+		for (let entryHolder of entryHolders) {
 			let text;
 			let input;
 			if (extractorMode) {
@@ -530,7 +517,6 @@
 				}
 
 				text = textarea.value;
-				if (text === "") text = answerBlank.answer;
 
 				input = null;
 			} else {
