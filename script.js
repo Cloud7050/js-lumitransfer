@@ -276,12 +276,12 @@
 	}
 
 	function extractTextParts(node, parentNode = null) {
-		let whitelistedNodes = [
+		let whitelistedNodeTypes = [
 			Node.ELEMENT_NODE,
 			Node.TEXT_NODE
 		];
 		let children = [...node.childNodes].filter(
-			(child) => whitelistedNodes.includes(child.nodeType)
+			(child) => whitelistedNodeTypes.includes(child.nodeType)
 		);
 
 		let textParts = [];
