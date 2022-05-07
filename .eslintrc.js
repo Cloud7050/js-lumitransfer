@@ -351,7 +351,7 @@ module.exports = {
 		"require-await": 1,
 		"require-unicode-regexp": 1,
 		"require-yield": 1, // Was 2
-		"sort-imports": 1,
+		// "sort-imports": 0,
 		// "sort-keys": 0,
 		// "sort-vars": 0,
 		"spaced-comment": [
@@ -490,7 +490,14 @@ module.exports = {
 			"never" // Was "always"
 		],
 		// "padding-line-between-statements": 0,
-		"quotes": 1,
+		"quotes": [
+			1,
+			"double", // Same
+			{
+				avoidEscape: true
+				// allowTemplateLiterals: false
+			}
+		],
 		"rest-spread-spacing": 1,
 		"semi": 1,
 		"semi-spacing": 1,
