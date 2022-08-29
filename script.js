@@ -511,7 +511,6 @@
 				let textarea = entryHolder.querySelector("textarea.answer-fib");
 				if (textarea === null) {
 					e("No textarea found in entry holder");
-					console.groupEnd();
 					continue;
 				}
 
@@ -524,7 +523,6 @@
 				input = entryHolder.querySelector("input.form-control");
 				if (input === null) {
 					e("No input found in entry holder");
-					console.groupEnd();
 					continue;
 				}
 			}
@@ -533,7 +531,6 @@
 				new BlanksEntry(text, input)
 			);
 			successCount++;
-			console.groupEnd();
 		}
 
 		if (entries.length === 0) {
@@ -560,21 +557,18 @@
 			let textHolder = entryHolder.querySelector("div.text");
 			if (textHolder === null) {
 				e("No text holder found in entry holder");
-				console.groupEnd();
 				continue;
 			}
 
 			let textParts = extractTextParts(textHolder);
 			if (textParts.length === 0) {
 				e("No text parts extracted from text holder");
-				console.groupEnd();
 				continue;
 			}
 
 			let checkbox = entryHolder.querySelector("input[type=checkbox]");
 			if (checkbox === null) {
 				e("No checkbox found in entry holder");
-				console.groupEnd();
 				continue;
 			}
 
@@ -590,7 +584,6 @@
 				)
 			);
 			successCount++;
-			console.groupEnd();
 		}
 
 		if (entries.length === 0) {
@@ -621,21 +614,18 @@
 			let textHolder = entryHolder.querySelector("div.text");
 			if (textHolder === null) {
 				e("No text holder found in entry holder");
-				console.groupEnd();
 				continue;
 			}
 
 			let textParts = extractTextParts(textHolder);
 			if (textParts.length === 0) {
 				e("No text parts extracted from text holder");
-				console.groupEnd();
 				continue;
 			}
 
 			let button = entryHolder.querySelector("input[type=radio]");
 			if (button === null) {
 				e("No button found in entry holder");
-				console.groupEnd();
 				continue;
 			}
 
@@ -646,7 +636,6 @@
 				if (checked) {
 					if (soleButton !== null) {
 						e("Multiple checked buttons found in entry holders");
-						console.groupEnd();
 						return null;
 					}
 
@@ -662,7 +651,6 @@
 				)
 			);
 			successCount++;
-			console.groupEnd();
 		}
 
 		if (entries.length === 0) {
@@ -688,7 +676,7 @@
 				let success = importOne(storedQuestion, pageQuestions);
 				if (success) successCount++;
 			} catch (error) {
-				e("⛔ Your stored answer is in a different format. You may be running a newer version of the script on outdated data - try reimporting your answers");
+				e("⛔ Your stored answer is in a different format. You may be running a newer version of the script on outdated data - try re-extracting your answers");
 				e(error);
 			}
 
