@@ -1,3 +1,9 @@
+# Project Superseded
+
+[**See here for LumiTransfer's successor: CanvasTransfer.**](https://github.com/Cloud7050/js-canvastransfer)
+
+With the move from LumiNUS to Canvas LMS, this project is no longer being maintained. I've faced a similar need for a tool like this on Canvas, so CanvasTransfer now takes this project's place, aiming to provide similar functionality.
+
 # LumiNUS Quiz Transfer Automation
 
 This easy-to-use script aims to make transferring LumiNUS quiz answers from your results page into your next attempt a breeze, thereby reducing tedium, frustration, and wasted time.
